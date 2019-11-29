@@ -7,6 +7,8 @@
 #include <iomanip>
 #include <stdexcept>
 #include <fstream>
+#include <cmath>
+#include <numeric>
 
 #include "Platform.hh"
 
@@ -281,6 +283,15 @@ namespace eudaq {
   template <typename T>
   inline void WriteToFile(const std::string &fname, const T &val) {
     WriteStringToFile(fname, to_string(val));
+  }
+
+  template <typename T>
+  std::pair<float, float> calc_mean(std::vector<T> vec){
+
+    float mean = std::accumulate(vec.begin(), vec.end(), 0.0) / float(vec.size());
+    float sq_sum = std::inner_product(vec.begin(), vec.end(), vec.begin(), 0.0);
+    float stdev = std::sqrt(sq_sum / vec.size() - mean * mean);
+    return std::make_pair(mean, stdev);
   }
 }
 
