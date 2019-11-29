@@ -67,4 +67,17 @@ namespace eudaq {
     m_planes.push_back(plane);
     return m_planes.back();
   }
+
+  StandardWaveform & StandardEvent::GetWaveform(size_t i) {
+    return m_waveforms[i];
+  }
+
+  const StandardWaveform & StandardEvent::GetWaveform(size_t i) const {
+    return m_waveforms[i];
+  }
+
+  StandardWaveform & StandardEvent::AddWaveform(const StandardWaveform & waveform) {
+    m_waveforms.push_back(waveform);
+    return m_waveforms.back();
+  }
 }

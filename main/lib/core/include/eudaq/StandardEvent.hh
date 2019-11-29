@@ -3,9 +3,9 @@
 
 #include "eudaq/Event.hh"
 #include "eudaq/StandardPlane.hh"
+#include "eudaq/StandardWaveform.hh"
 #include <vector>
 #include <string>
-
 
 
 namespace eudaq {
@@ -22,10 +22,18 @@ namespace eudaq {
     StandardEvent();
     StandardEvent(Deserializer &);
 
+    /** Standard Plane */
     StandardPlane &AddPlane(const StandardPlane &);
     size_t NumPlanes() const;
     const StandardPlane &GetPlane(size_t i) const;
     StandardPlane &GetPlane(size_t i);
+
+    /** Standard Waveform */
+    StandardWaveform & AddWaveform(const StandardWaveform &);
+    uint16_t GetNWaveforms() const { return uint16_t(m_waveforms.size()); }
+    const StandardWaveform & GetWaveform(size_t i) const;
+    StandardWaveform & GetWaveform(size_t i);
+
     virtual void Serialize(Serializer &) const;
     virtual void Print(std::ostream & os,size_t offset = 0) const;
 
@@ -72,6 +80,7 @@ namespace eudaq {
 
   private:
     std::vector<StandardPlane> m_planes;
+    std::vector<StandardWaveform> m_waveforms;
     uint64_t time_begin{0}, time_end{0};
     std::string detector_type;
   };
