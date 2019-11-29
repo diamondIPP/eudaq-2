@@ -1,7 +1,6 @@
 include_directories(${EUDAQ_INCLUDE_DIRS})
 
 # Define interface library for all EUDAQ modules:
-
 add_subdirectory(example)
 add_subdirectory(experimental)
 add_subdirectory(eudet)
@@ -15,3 +14,15 @@ add_subdirectory(aidastrip)
 add_subdirectory(tbscDESY)
 add_subdirectory(MuPix8)
 add_subdirectory(piStage)
+
+# Define optional producers
+macro(add_optional_subdirectory dir)
+    option(USER_${dir}_BUILD "Build user in directory ${dir}?" OFF)
+    if(USER_${dir}_BUILD OR BUILD_allproducer)
+        add_subdirectory(${dir})
+        MESSAGE( STATUS "Building producer: " ${dir} )
+    endif()
+endmacro()
+set( ENV{DRS_PATH} /home/testbeam/sdvlp/DRS4-v5-shared)
+#add_optional_subdirectory(DRS4)
+add_subdirectory(DRS4)
