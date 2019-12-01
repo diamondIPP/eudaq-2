@@ -5,7 +5,7 @@
 #  PXARCORE_LIBRARIES - The libraries needed to use pxarCore
 #  PXARCORE_DEFINITIONS - Compiler switches required for using pxarCore
 
-MESSAGE(STATUS "Looking for CMSPixel dependencies: pxarCore...")
+MESSAGE(STATUS "Looking for CMSPixel dependencies: pxarCore... PXARPATH = ${PXARPATH}")
 
 find_path(PXARCORE_API_INCLUDE_DIR api.h
   HINTS "${PXARPATH}/core/api" "$ENV{PXARPATH}/core/api")
