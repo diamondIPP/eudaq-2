@@ -27,11 +27,11 @@ public:
   void DoTerminate() override;
   void RunLoop() override;
 
-  static const uint32_t m_id_factory0 = eudaq::cstr2hash("CMSPixelREF");
-  static const uint32_t m_id_factory1 = eudaq::cstr2hash("CMSPixelTRP");
-  static const uint32_t m_id_factory2 = eudaq::cstr2hash("CMSPixelDIG");
-  static const uint32_t m_id_factory3 = eudaq::cstr2hash("CMSPixelANA");
-  static const uint32_t m_id_factory4 = eudaq::cstr2hash("CMSPixelDUT");
+  static const uint32_t m_id_factory0 = eudaq::cstr2hash("CMSPixelProducerREF");
+  static const uint32_t m_id_factory1 = eudaq::cstr2hash("CMSPixelProducerTRP");
+  static const uint32_t m_id_factory2 = eudaq::cstr2hash("CMSPixelProducerDIG");
+  static const uint32_t m_id_factory3 = eudaq::cstr2hash("CMSPixelProducerANA");
+  static const uint32_t m_id_factory4 = eudaq::cstr2hash("CMSPixelProducerDUT");
 
   uint32_t GetTime() { return std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now() - m_start_time).count(); }
   void ResetTime() { m_start_time = std::chrono::steady_clock::now(); }
