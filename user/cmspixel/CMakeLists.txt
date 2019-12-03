@@ -5,6 +5,14 @@ ELSE(PXARCORE_FOUND)
   MESSAGE(FATAL_ERROR "Could not find CMSPixel pxarCore! Make sure to set the environment variable $PXARPATH to the path of your pxar installation!")
 ENDIF(PXARCORE_FOUND)
 
+list(APPEND CMAKE_PREFIX_PATH $ENV{ROOTSYS})
+find_package(ROOT QUIET)
+include_directories(${ROOT_INCLUDE_DIR})
+if(ROOT_USE_FILE)
+  include(${ROOT_USE_FILE})
+endif()
+MESSAGE("Found Root: " ${ROOT_FOUND})
+
 GET_FILENAME_COMPONENT(EUDAQ_USERNAME ${CMAKE_CURRENT_LIST_DIR} NAME)
 SET(EUDAQ_MODULE module_${EUDAQ_USERNAME})
 
