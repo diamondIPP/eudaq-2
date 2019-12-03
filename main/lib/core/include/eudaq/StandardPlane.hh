@@ -75,6 +75,8 @@ namespace eudaq {
     uint64_t GetTimestamp(uint32_t index, uint32_t frame) const;
     // NOTE this returns a timestamp in picoseconds
     uint64_t GetTimestamp(uint32_t index) const;
+    unsigned GetTrigCount() const {return m_trigger_count;}
+    unsigned GetTrigPhase() const {return m_trigger_phase;}
 
     bool GetPivot(uint32_t index, uint32_t frame = 0) const;
     void SetPivot(uint32_t index, uint32_t frame, bool PivotFlag);
@@ -98,6 +100,8 @@ namespace eudaq {
     void SetYSize(uint32_t y);
     void SetPivotPixel(uint32_t p);
     void SetFlags(FLAGS flags);
+    void SetTrigCount(unsigned trigger_count) {m_trigger_count = trigger_count;}
+    void SetTrigPhase(unsigned trigger_phase) {m_trigger_phase = trigger_phase;}
 
     uint32_t ID() const;
     const std::string &Type() const;
@@ -129,6 +133,8 @@ namespace eudaq {
     uint32_t m_ysize;
     uint32_t m_flags;
     uint32_t m_pivotpixel;
+    uint32_t m_trigger_count;
+    uint16_t m_trigger_phase;
 
     // Timestamp of this plane in picoseconds
     uint64_t m_timestamp{};
