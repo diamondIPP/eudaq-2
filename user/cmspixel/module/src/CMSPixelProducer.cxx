@@ -4,7 +4,7 @@
 #include "eudaq/Utils.hh"
 #include "eudaq/OptionParser.hh"
 #include "eudaq/Configuration.hh"
-#include "config.h" // Version symbols
+#include "RConfigure.h" // Version symbols
 
 #include "api.h"
 #include "constants.h"

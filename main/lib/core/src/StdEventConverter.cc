@@ -23,10 +23,10 @@ namespace eudaq{
       d2->SetDescription(d1->GetDescription());
       size_t nsub = d1->GetNumSubEvent();
       for(size_t i=0; i<nsub; i++){
-	auto subev = d1->GetSubEvent(i);
-	if(!d1->IsFlagFake())
-	  if(!StdEventConverter::Convert(subev, d2, conf))
-	    return false;
+        auto subev = d1->GetSubEvent(i);
+	      if(!d1->IsFlagFake())
+	        if(!StdEventConverter::Convert(subev, d2, conf))
+	          return false;
       }
       d2->ClearFlagBit(Event::Flags::FLAG_PACK);
       return  true;
