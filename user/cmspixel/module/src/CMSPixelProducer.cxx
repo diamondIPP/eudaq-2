@@ -502,7 +502,8 @@ void CMSPixelProducer::RunLoop() {
     try {
 	    pxar::rawEvent daqEvent = m_api->daqGetRawEvent();
 	    auto event = eudaq::Event::MakeUnique(m_event_type);
-	    event->AddBlock(0, daqEvent.data);
+      event->AddBlock(0, reinterpret_cast<const char*>(&daqEvent.data[0]), sizeof(daqEvent.data[0]) * daqEvent.data.size());
+//	    event->AddBlock(0, daqEvent.data);
 	    SendEvent(move(event));
       cout << "Pixel event: " << m_ev + 1 << ", hits: " << (daqEvent.GetSize() - 4 - m_nplanes * 2) / 6 << endl;
 	    m_ev++;
