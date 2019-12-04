@@ -391,6 +391,7 @@ void CMSPixelProducer::DoStartRun() {
     bore->SetTag("PCBTYPE", m_pcbtype);
     bore->SetTag("DETECTOR", m_detector);
     bore->SetTag("PXARCORE", m_api->getVersion());
+    bore->SetTriggerN(0);
     SendEvent(move(bore));
 
     cout << "BORE with detector " << m_detector << " (event type " << m_event_type << ") and ROC type " << m_roctype << endl;
@@ -502,11 +503,10 @@ void CMSPixelProducer::RunLoop() {
     try {
 	    pxar::rawEvent daqEvent = m_api->daqGetRawEvent();
 	    auto event = eudaq::Event::MakeUnique(m_event_type);
-      event->AddBlock(0, reinterpret_cast<const char*>(&daqEvent.data[0]), sizeof(daqEvent.data[0]) * daqEvent.data.size());
-//	    event->AddBlock(0, daqEvent.data);
+	    event->AddBlock(0, daqEvent.data);
+	    event->SetTriggerN(++m_ev);
 	    SendEvent(move(event));
       cout << "Pixel event: " << m_ev + 1 << ", hits: " << (daqEvent.GetSize() - 4 - m_nplanes * 2) / 6 << endl;
-	    m_ev++;
       // Events with pixel data have more than 4 words for TBM header/trailer and 1 for each ROC header:
       if (daqEvent.data.size() > (4 + 3 * m_nplanes)) { m_ev_filled++; m_ev_runningavg_filled++; }
 
