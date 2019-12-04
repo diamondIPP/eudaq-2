@@ -35,7 +35,6 @@ namespace eudaq {
 
   public:
     std::map<std::string, float > roc_calibrations;
-    CMSPixelHelper(std::string event_type);
     CMSPixelHelper(const EventSPC& bore, const ConfigurationSPC& cnf);
     std::map< std::string, VCALDict> vcal_vals;
     TF1 * f_fit_function{};
@@ -51,6 +50,8 @@ namespace eudaq {
     bool read_ph_calibration_file(std::string roc_type, std::string fname, std::string i2cs, float factor);
 
     bool GetStandardSubEvent(eudaq::EventSPC in, eudaq::StandardEventSP out) const;
+
+    std::string get_event_type(const ConfigurationSPC & conf);
   };
 
 }

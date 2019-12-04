@@ -1,5 +1,7 @@
 #include <utility>
 
+#include <utility>
+
 #include "CMSPixelHelper.hh"
 #include <vector>
 #include "dictionaries.h"
@@ -42,12 +44,14 @@ using namespace pxar;
 
 namespace eudaq {
 
-  CMSPixelHelper::CMSPixelHelper(string event_type) : do_conversion(true), m_event_type(move(event_type)) {
-    m_conv_cfg = new Configuration("");
+  CMSPixelHelper::CMSPixelHelper(const EventSPC &bore, const ConfigurationSPC &cnf): do_conversion(true) {
+
     roc_calibrations = {{"psi46v2",           65},
                         {"psi46digv21respin", 47},
                         {"proc600",           47}};
     f_fit_function = new TF1("fitfunc", "[3]*(TMath::Erf((x-[0])/[1])+[2])", -4096, 4096);
+    m_event_type = get_event_type(cnf);
+    initialize(bore, cnf);
   }
 
   float CMSPixelHelper::get_charge(eudaq::VCALDict d, float val, float factor) const {
@@ -268,9 +272,13 @@ namespace eudaq {
     return rawData;
   }
 
-  CMSPixelHelper::CMSPixelHelper(const EventSPC &bore, const ConfigurationSPC &cnf) {
-
-    initialize(bore, cnf);
+  string CMSPixelHelper::get_event_type(const ConfigurationSPC & conf) {
+    string section_name = conf->GetCurrentSectionName();
+    if (section_name.find("REF") != string::npos) return "REF";
+    if (section_name.find("ANA") != string::npos) return "ANA";
+    else if (section_name.find("DIG") != string::npos) return "DIG";
+    else if (section_name.find("TRP") != string::npos) return "TRP";
+    return "DUT";
   }
 
 }
