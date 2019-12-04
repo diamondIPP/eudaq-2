@@ -27,6 +27,7 @@ public:
   RunControlGUI();
   void SetInstance(eudaq::RunControlUP rc);
   void Exec();
+  void SetPosition(QRect geom);
 private slots:
   void on_checkBox_stateChanged(int arg1);
 

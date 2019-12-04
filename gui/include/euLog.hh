@@ -34,6 +34,7 @@ public:
                   const std::string &runcontrol);
   ~LogCollectorGUI();
   void Exec() override;
+  void SetPosition(int, int, int, int) override;
 public:
   void DoInitialise() override;
   void DoConnect(eudaq::ConnectionSPC id) override;

@@ -32,6 +32,7 @@ namespace eudaq {
     void OnTerminate() override final;
     void OnLog(const std::string &param) override final{};
     virtual void Exec();
+    virtual void SetPosition(int, int, int, int){};
 
     virtual void DoInitialise(){};
     virtual void DoTerminate(){};

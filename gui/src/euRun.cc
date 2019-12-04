@@ -771,3 +771,14 @@ void RunControlGUI::on_checkBox_stateChanged(int arg1)
 {
 m_save_config_at_run_start = arg1;
 }
+
+void RunControlGUI::SetPosition(QRect geom) {
+
+  QSize fsize = frameGeometry().size();
+  if (geom.x() == -1) { geom.setX(x()); }
+  geom.setY(geom.y() == -1 ? y() : geom.y());
+  if (geom.width() == -1) { geom.setWidth(fsize.width()); }
+  if (geom.height() == -1) { geom.setHeight(fsize.height()); }
+  move(geom.topLeft());
+  resize(geom.size());
+}

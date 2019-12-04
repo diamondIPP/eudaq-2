@@ -234,3 +234,13 @@ void LogCollectorGUI::Exec(){
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
   }
 }
+
+void LogCollectorGUI::SetPosition(int x, int y, int w, int h) {
+
+  QSize fsize = frameGeometry().size();
+  QRect geom(x, y, w, h);
+  if (geom.width() == -1) { geom.setWidth(fsize.width()); }
+  if (geom.height() == -1) { geom.setHeight(fsize.height()); }
+  move(geom.topLeft());
+  resize(geom.size());
+}
