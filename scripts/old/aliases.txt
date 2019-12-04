@@ -1,0 +1,1 @@
+alias Collector='~/sdvlp/eudaq-drs4/bin/TestDataCollector.exe -r tcp://$HOSTNAME:$RCPORT'

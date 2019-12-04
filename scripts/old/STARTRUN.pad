@@ -1,0 +1,115 @@
+#!/bin/bash
+#dorfer@phys.ethz.ch
+
+#Activate/Deactivate Stuff
+export CMS=true
+export CAEN=true
+export CLK=false
+export CMS_DIG=false
+export DRS=false
+
+export HOSTNAME=192.168.1.102
+export ROOTSYS=/home/testbeam/sdvlp/root/build-new
+export RCPORT=44000
+export QT_GRAPHICSSYSTEM=native
+export LD_LIBRARY_PATH=$LD_LIBRARY_PATH:/home/eudaq-drs4/bin:/usr/local/lib/root
+
+RED='\033[00;31m'
+GREEN='\033[00;32m'
+BLUE='\033[00;34m'
+RESTORE='\033[0m'
+
+#size of individual xterm windows
+width=78
+pixelwidth=472
+height=20
+xpos=0
+ypos=911
+space=5
+
+
+echo $(pwd)
+echo 'STARTING DAQ'
+echo 'Cleaning up first...'
+/bin/bash ~/eudaq-drs4/etc/scripts/KILLRUN.pad
+cd ~/eudaq-drs4/bin
+
+
+echo -e "Making all data files properly write-protected.${RESTORE}\n"
+chmod a=r ~/eudaq-drs4/data/run*.raw
+echo -e "${GREEN}Done!${RESTORE}\n"
+
+
+echo 'Starting Subprocesses'
+
+echo 'RunControl'
+~/eudaq-drs4/bin/euRun.exe -x 0 -y -28 -w 500 -g 600 -a tcp://$RCPORT  &
+sleep 2
+
+echo 'LogCollector'
+~/eudaq-drs4/bin/euLog.exe -l DEBUG -x 600 -y -28 -w 600 -g 722 -r  tcp://$HOSTNAME:$RCPORT &
+echo -e "${GREEN}Please wait ..${RESTORE}\n"
+sleep 2
+
+echo 'DataCollector @ Rapidshare'
+xterm -geom $width'x'$height'+'$xpos'+'$ypos -hold -e 'ssh -tY rapidshare scripts/StartDataCollector.sh' &
+xpos=$((xpos+pixelwidth+space))
+echo -e "${GREEN}Please wait ..${RESTORE}\n"
+sleep 2
+
+echo 'TUProducer @ DAQ'
+xterm -geom $width'x'$height'+'$xpos'+'$ypos -hold -T 'TU' -e '~/eudaq-drs4/bin/TUProducer.exe -r tcp://$HOSTNAME:$RCPORT'  &
+xpos=$((xpos+pixelwidth+space))
+echo -e "${GREEN}Please wait ..${RESTORE}\n"
+sleep 2
+
+
+
+if [ "$CMS" = true ]; then
+    echo "${BLUE} CMSPixel @Pim1 ${RESTORE}\n"
+    xterm -geom $width'x'$height'+'$xpos'+'$ypos -hold -e 'ssh -tY pim1 scripts/StartCMSPixel.sh' &
+    xpos=$((xpos+pixelwidth+space))
+    echo -e "${GREEN}Please wait ..${RESTORE}\n"
+    sleep 1
+fi
+
+
+if [ "$CAEN" = true ]; then
+    echo "${BLUE} CAEN @ VME ${RESTORE}\n"
+    xterm -geom $width'x'$height'+'$xpos'+'$ypos -hold -e 'ssh -tY vme scripts/StartVME.sh' &
+    xpos=$((xpos+pixelwidth+space))
+    echo -e "${GREEN}Please wait ..${RESTORE}\n"
+    sleep 1
+fi
+
+
+if [ "$CLK" = true ]; then
+    echo "${BLUE} ClockGen @ DAQ ${RESTORE}\n"
+    xterm -geom $width'x'$height'+'$xpos'+'$ypos -hold -e '/home/testbeam/scripts/clockgen.sh'  &
+    xpos=$((xpos+pixelwidth+space))
+    echo -e "${GREEN}Please wait ..${RESTORE}\n"
+    sleep 1
+fi
+
+
+if [ "$CMS_DIG" = true ]; then
+    sleep 2
+    echo "${BLUE} CMSPixelDigital @ Pim1 ${RESTORE}\n"
+    xterm -geom $width'x'$height'+'$xpos'+'$ypos -hold -e 'ssh -tY pim1 scripts/StartCMSPixelDig.sh' &
+    xpos=$((xpos+pixelwidth+space))
+    echo -e "${GREEN}Please wait ..${RESTORE}\n"
+    sleep 1
+fi
+
+if [ "$DRS" = true ]; then
+    echo "${BLUE} DRS4 @ PiM1 ${RESTORE}\n"
+    xterm -geom $width'x'$height'+'$xpos'+'$ypos -hold -e 'ssh -tY pim1 scripts/StartDRS4.sh' &
+    xpos=$((xpos+pixelwidth+space))    
+    echo -e "${GREEN}Please wait ..${RESTORE}\n"
+    sleep 1
+fi
+
+
+cd -
+echo -e "${GREEN}DONE!${RESTORE}\n"
+echo -e "${GREEN}START OF DAQ COMPLETE${RESTORE}\n"

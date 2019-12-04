@@ -1,0 +1,3 @@
+#!/bin/sh
+
+DRS=false CMS=true CMS_DIG=false CLK=false ~/sdvlp/eudaq-drs4/etc/scripts/STARTRUN.psi

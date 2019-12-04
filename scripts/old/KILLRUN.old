@@ -1,0 +1,52 @@
+#!/bin/bash
+RED='\033[1m\033[91m'
+GREEN='\033[1m\033[92m'
+ENDC='\033[0m'
+
+a='bla\r'
+echo $a
+exit
+
+# cleanup of DAQ computer
+echo -e "$RED \nCLEANING UP DAQ COMPUTER ... $ENDC"
+PROCESSES="TUProducer.exe  euLog.exe euRun.exe TestDataCollector.exe"
+for thisprocess in $PROCESSES; do
+    pid=`pgrep -f $thisprocess`
+    for i in $pid; do
+	    echo -e "Killing $thisprocess with pid: $pid"
+        killall  $thisprocess 
+	    kill -9 $pid
+    done
+done
+# exit with status message if any process has been killed
+echo -e "${GREEN}KILLING EUDAQ ON DAQ COMPLETE\n $ENDC"
+
+# PIM1
+echo -e "${RED}CLEANING UP PIM1 ... $ENDC"
+screens=`ssh -tY analysis screen -list 2>/dev/null`
+for screen in DRS4Screen CMSPixelScreen CAENScreen TUScreen vpnScreen; do
+    pid=`ssh -tY analysis pgrep -f $screen 2>/dev/null`
+    pid=${pid%\r}
+    echo $pid
+    if $pid; then
+        echo $pid
+    fi
+done
+exit
+echo -e "${RED}Killing       DRS4 @ PiM1 ${RESTORE}"
+ssh -tY pim1 'screen -X -S  "DRS4Screen" kill'
+
+echo -e "${RED}Killing       CMSPixel @ PiM1 ${RESTORE}"
+ssh -tY pim1 'screen -X -S  "CMSPixelScreen" kill'
+
+echo -e "${RED}Killing       CAEN @ VME ${RESTORE}"
+ssh -tY pim1 'screen -X -S  "CAENScreen" kill'
+
+echo -e "${RED}Killing       TLU @ PiM1 ${RESTORE}"
+ssh -tY pim1 'screen -X -S  "TLUScreen" kill'
+
+echo -e "${RED}Killing       DataCollector @ rapidshare ${RESTORE}"
+ssh -tY rapidshare 'screen -X -S  "DataCollectorScreen" kill'
+
+ssh -tY pim1 "killall screen"
+killall xterm
