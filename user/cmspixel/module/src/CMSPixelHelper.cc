@@ -57,17 +57,17 @@ namespace eudaq {
     return d.calibration_factor * f_fit_function->GetX(val);
   }
 
-  void CMSPixelHelper::initialize(const eudaq::Event &bore, const eudaq::Configuration &cnf) {
+  void CMSPixelHelper::initialize(const EventSPC & bore, const ConfigurationSPC & cnf) {
     DeviceDictionary *devDict;
-    std::string roctype = bore.GetTag("ROCTYPE", "");
-    std::string tbmtype = bore.GetTag("TBMTYPE", "tbmemulator");
+    std::string roctype = bore->GetTag("ROCTYPE", "");
+    std::string tbmtype = bore->GetTag("TBMTYPE", "tbmemulator");
 
-    m_detector = bore.GetTag("DETECTOR", "");
-    std::string pcbtype = bore.GetTag("PCBTYPE", "");
-    m_rotated_pcb = (pcbtype.find("-rot") != std::string::npos ? true : false);
+    m_detector = bore->GetTag("DETECTOR", "");
+    std::string pcbtype = bore->GetTag("PCBTYPE", "");
+    m_rotated_pcb = pcbtype.find("-rot") != std::string::npos;
 
     // Get the number of planes:
-    m_nplanes = bore.GetTag("PLANES", 1);
+    m_nplanes = bore->GetTag("PLANES", 1);
 
     m_roctype = devDict->getInstance()->getDevCode(roctype);
     m_tbmtype = devDict->getInstance()->getDevCode(tbmtype);
@@ -84,21 +84,21 @@ namespace eudaq {
               << ", ROC type " << roctype << " (" << static_cast<int>(m_roctype) << ")" << std::endl;
   }
 
-  void CMSPixelHelper::read_ph_calibration(const eudaq::Configuration &cnf) {
+  void CMSPixelHelper::read_ph_calibration(const ConfigurationSPC & cnf) {
     std::cout << "TRY TO READ PH CALIBRATION DATA... ";
     bool foundData(false);
-    std::string roctype = cnf.Get("roctype", "roctype", "");
+    std::string roctype = cnf->Get("roctype", "roctype", "");
     bool is_digital = roctype.find("dig") != string::npos;
     string fname = m_conv_cfg->Get("phCalibrationFile", "");
-    if (fname == "") fname = cnf.Get("phCalibrationFile", "");
+    if (fname == "") fname = cnf->Get("phCalibrationFile", "");
     if (fname == "") {
-      fname = cnf.Get("dacFile", "");
+      fname = cnf->Get("dacFile", "");
       size_t found = fname.find_last_of("/");
       fname = fname.substr(0, found);
     }
     fname += (is_digital) ? "/phCalibrationFitErr" : "/phCalibrationGErfFit";
-    std::string i2c = cnf.Get("i2c", "i2caddresses", "0");
-    string section_name = cnf.GetCurrentSectionName();
+    std::string i2c = cnf->Get("i2c", "i2caddresses", "0");
+    string section_name = cnf->GetCurrentSectionName();
     if (section_name.find("REF") != string::npos) foundData = read_ph_calibration_file("REF", fname, i2c, roc_calibrations.at(roctype));
     else if (section_name.find("ANA") != string::npos) foundData = read_ph_calibration_file("ANA", fname, i2c, roc_calibrations.at(roctype));
     else if (section_name.find("DIG") != string::npos) foundData = read_ph_calibration_file("DIG", fname, i2c, roc_calibrations.at(roctype));
@@ -267,4 +267,10 @@ namespace eudaq {
     }
     return rawData;
   }
+
+  CMSPixelHelper::CMSPixelHelper(const EventSPC &bore, const ConfigurationSPC &cnf) {
+
+    initialize(bore, cnf);
+  }
+
 }
