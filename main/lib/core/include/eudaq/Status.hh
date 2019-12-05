@@ -44,7 +44,7 @@ namespace eudaq{
     Status(Deserializer &);
     ~Status() override;
     void Serialize(Serializer &) const override;
-    virtual void Print(std::ostream &os, size_t offset = 0) const;
+    void Print(std::ostream &os, size_t offset = 0) const;
     void ResetStatus(State st, Level lvl, const std::string &msg);
     void SetMessage(const std::string &msg);
     void SetTag(const std::string &key, const std::string &val);
