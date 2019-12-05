@@ -25,6 +25,7 @@ public:
   void DoStartRun() override;
   void DoStopRun() override;
   void DoTerminate() override;
+  void DoReset() override;
   void RunLoop() override;
 
   static const uint32_t m_id_factory0 = eudaq::cstr2hash("CMSPixelProducerREF");

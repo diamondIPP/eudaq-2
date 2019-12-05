@@ -30,7 +30,8 @@ class EudaqStart:
             self.Kill.all()
 
             # PORTS
-            self.Hostname = self.get_ip()
+            # self.Hostname = self.get_ip()
+            self.Hostname = '127.0.0.1'
             self.RCPort = self.Config.get('PORT', 'rc')
             self.Port = 'tcp://{}:{}'.format(self.Hostname, self.RCPort)
 

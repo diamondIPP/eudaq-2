@@ -481,6 +481,11 @@ void CMSPixelProducer::DoStopRun() {
   }
 }
 
+void CMSPixelProducer::DoReset(){
+    m_running = false;
+    cout << "Reset was passed" << endl;
+}
+
 void CMSPixelProducer::DoTerminate() {
 
   cout << "CMSPixelProducer terminating..." << endl;

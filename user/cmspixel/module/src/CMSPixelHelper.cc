@@ -273,11 +273,14 @@ namespace eudaq {
   }
 
   string CMSPixelHelper::get_event_type(const ConfigurationSPC & conf) {
-    string section_name = conf->GetCurrentSectionName();
-    if (section_name.find("REF") != string::npos) return "REF";
-    if (section_name.find("ANA") != string::npos) return "ANA";
-    else if (section_name.find("DIG") != string::npos) return "DIG";
-    else if (section_name.find("TRP") != string::npos) return "TRP";
+      std::cout<< "BLAA -1" << std::endl;
+//    string section_name = conf->GetCurrentSectionName();
+    string section_name = "REF";
+    if (section_name.find("REF") != string::npos) { std::cout << "Bla0"<<std::endl;return "REF";}
+    if (section_name.find("ANA") != string::npos) {std::cout << "Bla1"<<std::endl;return "ANA";}
+    else if (section_name.find("DIG") != string::npos) {std::cout << "Bla2"<<std::endl;return "DIG";}
+    else if (section_name.find("TRP") != string::npos) {std::cout << "Bla3"<<std::endl;return "TRP";}
+      std::cout << "Bla4"<<std::endl;
     return "DUT";
   }
 
