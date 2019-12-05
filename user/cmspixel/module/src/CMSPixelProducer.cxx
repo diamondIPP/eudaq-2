@@ -39,6 +39,7 @@ CMSPixelProducer::CMSPixelProducer(const string & name, const string & runcontro
     m_detector(""),
     m_event_type(""),
     m_alldacs(""),
+    m_eventType(""),
     m_terminated(false),
     m_running(false),
     triggering(false),
@@ -167,6 +168,9 @@ void CMSPixelProducer::DoConfigure() {
     // Read the type of carrier PCB used ("desytb", "desytb-rot"):
     m_pcbtype = m_config->Get("pcbtype", "desytb");
 
+    // Read the type of the event ("REF", "DIG", "ANA", "DUT", "TRP")
+    m_eventType = m_config->Get("event_type", "REF");
+
     // Read the mask file if existent:
     vector<pxar::pixelConfig> maskbits = GetConfMaskBits();
 
@@ -230,7 +234,7 @@ void CMSPixelProducer::DoConfigure() {
     }
 
     // Switching to the selected trigger source and check if DTB returns TRUE:
-    string triggersrc = m_config->Get("trigger_source","extern");
+    string triggersrc = m_config->Get("trigger_source", "extern");
     if(!m_api->daqTriggerSource(triggersrc)) {
       throw InvalidConfig("Couldn't select trigger source " + string(triggersrc));
     }
@@ -389,9 +393,10 @@ void CMSPixelProducer::DoStartRun() {
     bore->SetTag("PCBTYPE", m_pcbtype);
     bore->SetTag("DETECTOR", m_detector);
     bore->SetTag("PXARCORE", m_api->getVersion());
+    bore->SetTag("EVENTTYPE", m_eventType);
     bore->SetTriggerN(0);
     SendEvent(move(bore));
-
+    m_ev++;
     cout << "BORE with detector " << m_detector << " (event type " << m_event_type << ") and ROC type " << m_roctype << endl;
 
     m_api->daqStart(); /** Start the Data Acquisition: */
@@ -449,7 +454,8 @@ void CMSPixelProducer::DoStopRun() {
       for(auto & daqEvent : daqEvents) {
         auto event = eudaq::Event::MakeUnique(m_event_type);
 	      event->AddBlock(0, daqEvent.data);
-	      event->SetTriggerN(++m_ev);
+	      event->SetTriggerN(m_ev++);
+//	      event->SetTriggerN(++m_ev);
 	      SendEvent(move(event));
 	      if(daqEvent.data.size() > 1) { m_ev_filled++; }
       }
@@ -499,7 +505,7 @@ void CMSPixelProducer::RunLoop() {
   while (m_running) {
 
     // Send periodic ROC Reset
-    cout << m_roc_resetperiod << " " << GetTime() << endl;
+//    cout << m_roc_resetperiod << " " << GetTime() << endl;
     if(m_roc_resetperiod > 0 and GetTime() > m_roc_resetperiod) {
       if(!m_api->daqSingleSignal("resetroc")) { EUDAQ_ERROR(string("Unable to send ROC reset signal!\n")); }
       ResetTime();
@@ -510,8 +516,8 @@ void CMSPixelProducer::RunLoop() {
 	    pxar::rawEvent daqEvent = m_api->daqGetRawEvent();
 	    auto event = eudaq::Event::MakeUnique(m_event_type);
         event->AddBlock(0,reinterpret_cast<const char *>(&daqEvent.data[0]), sizeof(daqEvent.data[0]) * daqEvent.data.size());
-
-	    event->SetTriggerN(++m_ev);
+	    event->SetTriggerN(m_ev++);
+//	    event->SetTriggerN(++m_ev);
 	    SendEvent(move(event));
       cout << "Pixel event: " << m_ev + 1 << ", hits: " << (daqEvent.GetSize() - 4 - m_nplanes * 2) / 6 << endl;
       // Events with pixel data have more than 4 words for TBM header/trailer and 1 for each ROC header:

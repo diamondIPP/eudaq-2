@@ -52,7 +52,8 @@ namespace eudaq {
                         {"psi46digv21respin", 47},
                         {"proc600",           47}};std::cout << "gla0" << std::endl;
     f_fit_function = new TF1("fitfunc", "[3]*(TMath::Erf((x-[0])/[1])+[2])", -4096, 4096);
-    m_event_type = get_event_type(cnf);
+    m_event_type = bore->GetTag("EVENTTYPE", "REF");
+//    m_event_type = get_event_type(cnf);
     initialize(bore, cnf);
   }
 
@@ -284,14 +285,14 @@ namespace eudaq {
     return rawData;
   }
 
-  string CMSPixelHelper::get_event_type(const ConfigurationSPC & conf) {
-//    string section_name = conf->GetCurrentSectionName();
-    string section_name = "REF";
-    if (section_name.find("REF") != string::npos) { return "REF";}
-    if (section_name.find("ANA") != string::npos) {return "ANA";}
-    else if (section_name.find("DIG") != string::npos) {return "DIG";}
-    else if (section_name.find("TRP") != string::npos) {return "TRP";}
-    return "DUT";
-  }
+//  string CMSPixelHelper::get_event_type(const ConfigurationSPC & conf) {
+////    string section_name = conf->GetCurrentSectionName();
+//    string section_name = "REF";
+//    if (section_name.find("REF") != string::npos) { return "REF";}
+//    if (section_name.find("ANA") != string::npos) {return "ANA";}
+//    else if (section_name.find("DIG") != string::npos) {return "DIG";}
+//    else if (section_name.find("TRP") != string::npos) {return "TRP";}
+//    return "DUT";
+//  }
 
 }
