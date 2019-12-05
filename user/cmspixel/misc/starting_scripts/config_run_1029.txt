@@ -2,7 +2,7 @@
 EUDAQ_CTRL_PRODUCER_LAST_START = eudet_tlu
 
 [Producer.eudet_tlu]
-AndMask = 7
+AndMask = 15
 OrMask = 0
 VetoMask = 0
 DutMask = 9
@@ -25,7 +25,7 @@ DISABLE_PRINT = 1
 
 [DataCollector.one_dc]
 EUDAQ_MN = StdEventMonitor
-EUDAQ_DATACOL_SEND_MONITOR_FRACTION = 1
+EUDAQ_DATACOL_SEND_MONITOR_FRACTION = 10
 EUDAQ_FW = native
 EUDAQ_FW_PATTERN = /home/teleuser/ETH/data/run$6R_$12D$X
 DISABLE_PRINT = 1
@@ -34,7 +34,6 @@ DISABLE_PRINT = 1
 
 [Producer.CMSREF]
 EUDAQ_DC = one_dc
-detector_name = "Micha Puto"
 #EUDAQ_DC = cmspix_dc
 
 
@@ -52,8 +51,7 @@ dacFile = "/home/teleuser/ETH/data/D02/dacParameters40"
 
 ####### SETTINGS #######
 i2c = 0  # spaces between the i2cs
-; wbc = 104
-wbc = 113
+wbc = 104
 
 ####### DTB INFO #######
 usbId = "DTB_WV80Z6"

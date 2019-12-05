@@ -34,7 +34,6 @@ DISABLE_PRINT = 1
 
 [Producer.CMSREF]
 EUDAQ_DC = one_dc
-detector_name = "Micha Puto"
 #EUDAQ_DC = cmspix_dc
 
 

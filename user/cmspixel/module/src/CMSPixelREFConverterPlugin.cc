@@ -30,19 +30,23 @@ namespace eudaq {
     // The EventN is set by EUDAQ2 in background.
     // First Event (in a data-taking-run for each Producer) has EventN==0 and BORE flag by EUDAQ2 default (base class).
     // Assuming you always send config tag at begin of a run (0-EventN event).
-    if (in->GetEventN() == 0) {
-      if (s_converter) {
-        std::cout << "WARN: global converter is replaced as a new 0-EventN Event arrival." << std::endl;
-        std::cout << "WARN: it is fine if you just start a new data taking." << std::endl;
-        delete s_converter;
-        s_converter = nullptr;
-        s_converter = new CMSPixelHelper(in, conf);
-      } else {
-        std::cout << "INFO: new global converter is created as a new 0-EventN Event arrival" << std::endl;
-        s_converter = new CMSPixelHelper(in, conf);
+      if (in->GetEventN() == 0) {
+          if (s_converter) {
+              std::cout << "WARN: global converter is replaced as a new 0-EventN Event arrival." << std::endl;
+              std::cout << "WARN: it is fine if you just start a new data taking." << std::endl;
+              delete s_converter;
+              s_converter = nullptr;
+              s_converter = new CMSPixelHelper(in, conf);
+//              Configuration *bla = new Configuration(*conf);
+//              s_converter->set_config(bla);
+          } else {
+              std::cout << "INFO: new global converter is created as a new 0-EventN Event arrival" << std::endl;
+              s_converter = new CMSPixelHelper(in, conf);
+//              Configuration *bla = new Configuration(*conf);
+//              s_converter->set_config(bla);
+          }
+          return true; // in case you BORE has real detector data, remove this line.
       }
-      return true; // in case you BORE has real detector data, remove this line.
-    }
     if (!s_converter) {
       std::cerr << "ERROR: There must be a tagged 0-EventN Event which helps to create the global converter.\n";
       throw;

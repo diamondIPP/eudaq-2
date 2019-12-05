@@ -45,10 +45,12 @@ using namespace pxar;
 namespace eudaq {
 
   CMSPixelHelper::CMSPixelHelper(const EventSPC &bore, const ConfigurationSPC &cnf): do_conversion(true) {
-
+      if(bore->IsBORE()){
+          std::cout << "is bore with roctype: " << bore->GetTag("ROCTYPE", "estamierdanofunciona") << std::endl;
+      }
     roc_calibrations = {{"psi46v2",           65},
                         {"psi46digv21respin", 47},
-                        {"proc600",           47}};
+                        {"proc600",           47}};std::cout << "gla0" << std::endl;
     f_fit_function = new TF1("fitfunc", "[3]*(TMath::Erf((x-[0])/[1])+[2])", -4096, 4096);
     m_event_type = get_event_type(cnf);
     initialize(bore, cnf);
@@ -63,25 +65,28 @@ namespace eudaq {
 
   void CMSPixelHelper::initialize(const EventSPC & bore, const ConfigurationSPC & cnf) {
     DeviceDictionary *devDict;
-    std::string roctype = bore->GetTag("ROCTYPE", "");
-    std::string tbmtype = bore->GetTag("TBMTYPE", "tbmemulator");
-
-    m_detector = bore->GetTag("DETECTOR", "");
-    std::string pcbtype = bore->GetTag("PCBTYPE", "");
-    m_rotated_pcb = pcbtype.find("-rot") != std::string::npos;
+    std::string roctype = bore->GetTag("ROCTYPE", "estamierdanofunciona");
+      std::string tbmtype = bore->GetTag("TBMTYPE", "tbmemulator2");
+      m_detector = bore->GetTag("DETECTOR", "");
+      std::string pcbtype = bore->GetTag("PCBTYPE", "");
+      m_rotated_pcb = pcbtype.find("-rot") != std::string::npos;
 
     // Get the number of planes:
     m_nplanes = bore->GetTag("PLANES", 1);
-
     m_roctype = devDict->getInstance()->getDevCode(roctype);
-    m_tbmtype = devDict->getInstance()->getDevCode(tbmtype);
-
+      m_tbmtype = devDict->getInstance()->getDevCode(tbmtype);
     if (m_roctype == 0x0)
       EUDAQ_ERROR("Roctype" + to_string((int) m_roctype) + " not propagated correctly to CMSPixelConverterPlugin");
-    read_ph_calibration(cnf);
 
-    m_conv_cfg->SetSection("Converter.telescopetree");
-    decodingOffset = m_conv_cfg->Get("decoding_offset", 25);
+//    if(m_conv_cfg){
+//        std::cout << "blaas0"<< std::endl;
+//        m_conv_cfg->Print();
+//    }
+
+//    read_ph_calibration(cnf); // REVERT IT BACK - IL
+
+//    m_conv_cfg->SetSection("Converter.telescopetree");
+//    decodingOffset = m_conv_cfg->Get("decoding_offset", 0);
 
     std::cout << "CMSPixel Converter initialized with detector " << m_detector << ", Event Type " << m_event_type
               << ", TBM type " << tbmtype << " (" << static_cast<int>(m_tbmtype) << ")"
@@ -158,7 +163,8 @@ namespace eudaq {
   bool CMSPixelHelper::GetStandardSubEvent(eudaq::EventSPC in, eudaq::StandardEventSP out) const {
 
     /** If we receive the EORE print the collected statistics: */
-    if (out->IsEORE()) {
+//    if (out->IsEORE()) {
+    if (in->IsEORE()) {
       std::cout << "Decoding statistics for detector " << m_detector << std::endl;
       pxar::Log::ReportingLevel() = pxar::Log::FromString("INFO");
       decoding_stats.dump();
@@ -273,14 +279,12 @@ namespace eudaq {
   }
 
   string CMSPixelHelper::get_event_type(const ConfigurationSPC & conf) {
-      std::cout<< "BLAA -1" << std::endl;
 //    string section_name = conf->GetCurrentSectionName();
     string section_name = "REF";
-    if (section_name.find("REF") != string::npos) { std::cout << "Bla0"<<std::endl;return "REF";}
-    if (section_name.find("ANA") != string::npos) {std::cout << "Bla1"<<std::endl;return "ANA";}
-    else if (section_name.find("DIG") != string::npos) {std::cout << "Bla2"<<std::endl;return "DIG";}
-    else if (section_name.find("TRP") != string::npos) {std::cout << "Bla3"<<std::endl;return "TRP";}
-      std::cout << "Bla4"<<std::endl;
+    if (section_name.find("REF") != string::npos) { return "REF";}
+    if (section_name.find("ANA") != string::npos) {return "ANA";}
+    else if (section_name.find("DIG") != string::npos) {return "DIG";}
+    else if (section_name.find("TRP") != string::npos) {return "TRP";}
     return "DUT";
   }
 

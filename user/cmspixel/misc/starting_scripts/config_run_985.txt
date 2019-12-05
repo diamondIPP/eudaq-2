@@ -2,7 +2,7 @@
 EUDAQ_CTRL_PRODUCER_LAST_START = eudet_tlu
 
 [Producer.eudet_tlu]
-AndMask = 7
+AndMask = 2
 OrMask = 0
 VetoMask = 0
 DutMask = 9
@@ -20,12 +20,12 @@ DISABLE_PRINT = 1
 
 [Producer.ni_mimosa]
 # Define the data collector to be used by the producer
-EUDAQ_DC = one_dc
+EUDAQ_DC = one_dc 
 DISABLE_PRINT = 1
 
 [DataCollector.one_dc]
 EUDAQ_MN = StdEventMonitor
-EUDAQ_DATACOL_SEND_MONITOR_FRACTION = 1
+EUDAQ_DATACOL_SEND_MONITOR_FRACTION = 10
 EUDAQ_FW = native
 EUDAQ_FW_PATTERN = /home/teleuser/ETH/data/run$6R_$12D$X
 DISABLE_PRINT = 1
@@ -34,9 +34,6 @@ DISABLE_PRINT = 1
 
 [Producer.CMSREF]
 EUDAQ_DC = one_dc
-detector_name = "Micha Puto"
-#EUDAQ_DC = cmspix_dc
-
 
 roctype = psi46v2
 pcbtype = psipcb
@@ -52,8 +49,7 @@ dacFile = "/home/teleuser/ETH/data/D02/dacParameters40"
 
 ####### SETTINGS #######
 i2c = 0  # spaces between the i2cs
-; wbc = 104
-wbc = 113
+wbc = 104
 
 ####### DTB INFO #######
 usbId = "DTB_WV80Z6"
@@ -67,10 +63,10 @@ id = 1.00
 ia = 1.200
 
 ####### TIMINGS ############
-clk = 0
-ctr = 0
-sda = 15
-tin = 5
+clk = 11
+ctr = 11
+sda = 24
+tin = 14
 tout = 5
 deser160phase = 4
 level = 15
@@ -78,10 +74,3 @@ triggerlatency = 80
 tindelay = 14
 toutdelay = 8
 decodingOffset = 25
-
-#[DataCollector.cmspix_dc]
-;EUDAQ_MN = StdEventMonitor
-;EUDAQ_DATACOL_SEND_MONITOR_FRACTION = 10
-;EUDAQ_FW = native
-;EUDAQ_FW_PATTERN = /home/teleuser/ETH/data/run$6R_cmspix_$12D$X
-;DISABLE_PRINT = 1
