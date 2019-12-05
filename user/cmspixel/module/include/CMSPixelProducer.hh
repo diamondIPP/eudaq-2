@@ -50,21 +50,19 @@ private:
 
   eudaq::ConfigurationSPC m_config;
   std::chrono::steady_clock::time_point m_start_time;
-  unsigned m_run, m_ev, m_ev_filled, m_ev_runningavg_filled;
-  unsigned m_tlu_waiting_time;
-  unsigned m_roc_resetperiod;
+  unsigned m_ev, m_ev_filled, m_ev_runningavg_filled;
+  unsigned m_tlu_waiting_time, m_roc_resetperiod;
   unsigned m_nplanes;
   std::string m_verbosity, m_foutName, m_roctype, m_tbmtype, m_pcbtype, m_usbId, m_producer_name, m_detector, m_event_type, m_alldacs;
   bool m_terminated, m_running, triggering;
   bool m_trimmingFromConf, m_trigger_is_pg;
-  bool m_maskingFromConf;
+  int m_pattern_delay;
   std::string m_last_mask_filename;
 
   // Add one mutex to protect calls to pxarCore:
   std::mutex m_mutex;
   pxar::pxarCore * m_api;
 
-  int m_pattern_delay;
   std::ofstream m_fout;
 };
 

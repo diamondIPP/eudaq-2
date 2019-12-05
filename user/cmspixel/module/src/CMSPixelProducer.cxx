@@ -24,21 +24,14 @@ using namespace std;
 
 CMSPixelProducer::CMSPixelProducer(const string & name, const string & runcontrol)
   : eudaq::Producer(name, runcontrol),
+    m_start_time(chrono::steady_clock::now()),
     m_ev(0),
     m_ev_filled(0),
     m_ev_runningavg_filled(0),
     m_tlu_waiting_time(4000),
     m_roc_resetperiod(0),
     m_nplanes(1),
-    m_terminated(false),
-    m_running(false),
-    m_api(nullptr),
-    m_trimmingFromConf(false),
-    m_pattern_delay(0),
-    m_trigger_is_pg(false),
-    m_fout(nullptr),
     m_foutName(""),
-    triggering(false),
     m_roctype(""),
     m_pcbtype(""),
     m_usbId(""),
@@ -46,8 +39,15 @@ CMSPixelProducer::CMSPixelProducer(const string & name, const string & runcontro
     m_detector(""),
     m_event_type(""),
     m_alldacs(""),
+    m_terminated(false),
+    m_running(false),
+    triggering(false),
+    m_trimmingFromConf(false),
+    m_trigger_is_pg(false),
+    m_pattern_delay(0),
     m_last_mask_filename(""),
-    m_start_time(chrono::steady_clock::now())
+    m_api(nullptr),
+    m_fout(nullptr)
 {
   if(m_producer_name.find("REF") != string::npos) {
     m_detector = "REF";
@@ -79,7 +79,6 @@ void CMSPixelProducer::DoConfigure() {
 
   m_config = GetConfiguration();
   cout << "Configuring: " << m_config->Name() << endl;
-  bool confTrimming(false), confDacs(false);
 
   uint8_t hubid = m_config->Get("hubid", 31);
   string value = m_config->Get("event_type", "INVALID");
@@ -192,11 +191,10 @@ void CMSPixelProducer::DoConfigure() {
     m_pcbtype = m_config->Get("pcbtype","desytb");
 
     /** create api */
-    if (m_api)
-      delete m_api;
+    delete m_api;
     m_usbId = m_config->Get("usbId", "*");
     EUDAQ_EXTRA("Trying to connect to USB id: " + m_usbId + "\n");
-    m_api = new pxar::pxarCore(m_usbId, m_verbosity);
+    m_api = new pxar::pxarCore(m_usbId, m_config->Get("verbosity", "INFO"));
 
     // Initialize the testboard:
     if(!m_api->initTestboard(sig_delays, power_settings, pg_setup)) {
@@ -396,7 +394,7 @@ void CMSPixelProducer::DoStartRun() {
 
     cout << "BORE with detector " << m_detector << " (event type " << m_event_type << ") and ROC type " << m_roctype << endl;
 
-    m_api -> daqStart(); /** Start the Data Acquisition: */
+    m_api->daqStart(); /** Start the Data Acquisition: */
     // Send additional ROC Reset signal at run start:
     if(!m_api->daqSingleSignal("resetroc"))
       throw InvalidConfig("Unable to send ROC reset signal!");
@@ -405,7 +403,7 @@ void CMSPixelProducer::DoStartRun() {
 
     /** If we run on Pattern Generator, activate the PG loop: */
     if(m_trigger_is_pg) {
-      m_api -> daqTriggerLoop(m_pattern_delay);
+      m_api->daqTriggerLoop(m_pattern_delay);
       triggering = true;
     }
 
@@ -467,9 +465,9 @@ void CMSPixelProducer::DoStopRun() {
     cout << "Stopped" << endl;
 
     // Output information for the logbook:
-    cout << "RUN " << m_run << " CMSPixel " << m_detector << endl << "\t Total triggers:   \t" << m_ev << endl << "\t Total filled evt: \t" << m_ev_filled << endl;
+    cout << "RUN " << GetRunNumber() << " CMSPixel " << m_detector << endl << "\t Total triggers:   \t" << m_ev << endl << "\t Total filled evt: \t" << m_ev_filled << endl;
     cout << "\t " << m_detector << " yield: \t" << (m_ev > 0 ? to_string(100*m_ev_filled/m_ev) : "(inf)") << "%" << endl;
-    EUDAQ_USER(string("Run " + to_string(m_run) + ", detector " + m_detector + " yield: " + (m_ev > 0 ? to_string(100*m_ev_filled/m_ev) : "(inf)")
+    EUDAQ_USER(string("Run " + to_string(GetRunNumber()) + ", detector " + m_detector + " yield: " + (m_ev > 0 ? to_string(100*m_ev_filled/m_ev) : "(inf)")
 		      + "% (" + to_string(m_ev_filled) + "/" + to_string(m_ev) + ")"));
 
   } catch (const exception & e) {
@@ -484,6 +482,7 @@ void CMSPixelProducer::DoStopRun() {
 void CMSPixelProducer::DoReset(){
     m_running = false;
     cout << "Reset was passed" << endl;
+    delete m_api;
 }
 
 void CMSPixelProducer::DoTerminate() {
@@ -499,7 +498,8 @@ void CMSPixelProducer::RunLoop() {
   while (m_running) {
 
     // Send periodic ROC Reset
-    if(m_roc_resetperiod > 0 && GetTime() > m_roc_resetperiod) {
+    cout << m_roc_resetperiod << " " << GetTime() << endl;
+    if(m_roc_resetperiod > 0 and GetTime() > m_roc_resetperiod) {
       if(!m_api->daqSingleSignal("resetroc")) { EUDAQ_ERROR(string("Unable to send ROC reset signal!\n")); }
       ResetTime();
       }
