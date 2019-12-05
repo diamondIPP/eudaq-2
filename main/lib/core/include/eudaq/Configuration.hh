@@ -2,6 +2,7 @@
 #define EUDAQ_INCLUDED_Configuration
 
 #include "Utils.hh"
+#include <iostream>
 #include "Exception.hh"
 #include "Platform.hh"
 #include <functional>
@@ -56,7 +57,7 @@ namespace eudaq {
     void Load(std::istream &file, const std::string &section);
     bool SetSection(const std::string &section) const;
     bool SetSection(const std::string &section);
-    std::string GetCurrentSectionName() const {return m_section;};
+    std::string GetCurrentSectionName() const {std::cout << "entro" << std::endl;return m_section;};
     std::string operator[](const std::string &key) const {
       return GetString(key);
     }

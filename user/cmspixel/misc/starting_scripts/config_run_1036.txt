@@ -27,27 +27,25 @@ DISABLE_PRINT = 1
 EUDAQ_MN = StdEventMonitor
 EUDAQ_DATACOL_SEND_MONITOR_FRACTION = 1
 EUDAQ_FW = native
-EUDAQ_FW_PATTERN = /home/micha/software/data/run$6R_$12D$X
+EUDAQ_FW_PATTERN = /home/teleuser/ETH/data/run$6R_$12D$X
 DISABLE_PRINT = 1
 
 [Monitor.StdEventMonitor]
 
 [Producer.CMSREF]
 EUDAQ_DC = one_dc
-detector_name = "Micha Puto"
 #EUDAQ_DC = cmspix_dc
 
 
-roctype = psi46digv21respin
+roctype = psi46v2
 pcbtype = psipcb
 extclock = 0
 verbosity = WARNING
 tlu_waiting_time = 4000
-#rocresetperiod = 5000
 
 ####### FILES #########
-trimFile = "/home/micha/data/digROCs/test/trimParameters"
-dacFile = "/home/micha/data/digROCs/test/dacParameters"
+trimFile = "/home/teleuser/ETH/data/D02/trimParameters40"
+dacFile = "/home/teleuser/ETH/data/D02/dacParameters40"
 ; maskFile = "/home/teleuser/ETH/data/D2/bla.msk"
 
 
@@ -57,27 +55,27 @@ i2c = 0  # spaces between the i2cs
 wbc = 113
 
 ####### DTB INFO #######
-usbId = "DTB_WWXUD2"
+usbId = "DTB_WV80Z6"
 hubid = 0
 trigger_source = async  # async for external
 
 ####### SUPPLY VOLTAGES ####
-ia = 1.2
-id = 1.1
-va = 1.9
-vd = 2.6
+vd = 2.500
+va = 2.70
+id = 1.00
+ia = 1.200
 
 ####### TIMINGS ############
 clk = 0
 ctr = 0
 sda = 15
-#tin = 14
-#tout = 5
+tin = 5
+tout = 5
 deser160phase = 4
 level = 15
 triggerlatency = 80
-#tindelay = 14
-#toutdelay = 8
+tindelay = 14
+toutdelay = 8
 decodingOffset = 25
 
 #[DataCollector.cmspix_dc]
