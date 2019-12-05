@@ -5,32 +5,43 @@
 # --------------------------------------------------------
 
 from argparse import ArgumentParser
+from ConfigParser import ConfigParser
 from os import system
-from os.path import join, isfile
+from os.path import join, dirname, realpath, basename
+from glob import glob
+from utils import warning
+from json import loads
 
 parser = ArgumentParser()
 parser.add_argument('-tc', nargs='?', default='201908')
 parser.add_argument('-x', nargs='?', default='0')
-parser.add_argument('run')
+parser.add_argument('run', nargs='?', default=None, type=int)
 args = parser.parse_args()
 
+# Directories
 place = 'psi'
 raw_dir = 'setup'
-data_dir = '/data'
-eudaq_dir = join('~', 'eudaq-drs4')
+eudaq_dir = dirname(dirname(realpath(__file__)))
+data_dir = join(dirname(eudaq_dir), 'data')
+conf = 'desy'
 
-print 'Converting run {r} of test campaign {tc} in {d}'.format(r=args.run, tc=args.tc, d=raw_dir)
+# Configuration
+config = ConfigParser()
+config.read(join(eudaq_dir, 'scripts', 'config', '{}.ini'.format(conf)))
 
-run_dir = join(data_dir, '{p}_{y}_{m}'.format(p=place, y=args.tc[:4], m=args.tc[4:]), raw_dir)
-run_file = 'run{n}.raw'.format(n=args.run.zfill(6))
-conf_file = join(eudaq_dir, 'conf', 'converter_waveform_integrals.conf')
-run_file_path = join(run_dir, run_file)
-if not isfile(run_file_path):
-    print 'the file in {} does not exist!'.format(run_file_path)
-    exit()
+runs = glob(join(data_dir, 'run*.raw'))
+try:
+    run_file = max(runs) if args.run is None else next(run for run in runs if basename(run).startswith('run{:06d}'.format(args.run)))
+except StopIteration:
+    run_file = max(runs)
+    warning('Did not find run {} --> taking the last one ({}).'.format(args.run, run_file))
 
-prog = join(eudaq_dir, 'bin', 'OnlineMon.exe')
-cmd = '{} -sc 1 -u 500 -f {p} -c {c} -x {x}'.format(prog, p=run_file_path, c=conf_file, x=args.x)
-print cmd
+warning('Starting Online Monitor for {}'.format(basename(run_file)))
+
+conf_file = join(eudaq_dir, *loads(config.get('MISC', 'config file')))
+
+prog = join(eudaq_dir, 'bin', config.get('MISC', 'online monitor'))
+cmd = '{} -d {p} -c {c} -rf '.format(prog, p=run_file, c=conf_file)
+print '{} -d {p} -c {c} -rf '.format(basename(prog), p=basename(run_file), c=basename(conf_file))
 print
 system(cmd)
