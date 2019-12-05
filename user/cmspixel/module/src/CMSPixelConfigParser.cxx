@@ -193,12 +193,10 @@ vector<masking> CMSPixelProducer::GetConfMask(){
             mask.push_back(masking(identifier, roc, col, row));
 
         }
-        m_maskingFromConf = true;
     }
     else {
         cout << "Couldn't read mask parameters from \"" << string(filename) << "\". So I don't know how to mask ;-)\n";
         EUDAQ_WARN(string("Couldn't read mask parameters from \"") + string(filename) + ("\". So I don't know how to mask ;-)\n"));
-        m_maskingFromConf = false;
     }
 
     cout << "\033[1;32;48mFILENAME: \033[0m" <<  filename << "\n";
