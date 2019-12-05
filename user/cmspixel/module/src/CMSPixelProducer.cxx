@@ -451,9 +451,9 @@ void CMSPixelProducer::DoStopRun() {
       for(auto & daqEvent : daqEvents) {
         auto event = eudaq::Event::MakeUnique(m_event_type);
 	      event->AddBlock(0, daqEvent.data);
+	      event->SetTriggerN(++m_ev);
 	      SendEvent(move(event));
 	      if(daqEvent.data.size() > 1) { m_ev_filled++; }
-	      m_ev++;
       }
     }
     catch(pxar::DataNoEvent &) {
@@ -491,6 +491,7 @@ void CMSPixelProducer::DoTerminate() {
   cout << "CMSPixelProducer terminating..." << endl;
   m_terminated = true;
   delete m_api;
+  m_api = nullptr;
   cout << "CMSPixelProducer " << m_producer_name << " terminated." << endl;
 }
 
@@ -508,10 +509,11 @@ void CMSPixelProducer::RunLoop() {
     try {
 	    pxar::rawEvent daqEvent = m_api->daqGetRawEvent();
 	    auto event = eudaq::Event::MakeUnique(m_event_type);
-	    event->AddBlock(0, daqEvent.data);
+        event->AddBlock(0,reinterpret_cast<const char *>(&daqEvent.data[0]), sizeof(daqEvent.data[0]) * daqEvent.data.size());
+
 	    event->SetTriggerN(++m_ev);
 	    SendEvent(move(event));
-//      cout << "Pixel event: " << m_ev + 1 << ", hits: " << (daqEvent.GetSize() - 4 - m_nplanes * 2) / 6 << endl;
+      cout << "Pixel event: " << m_ev + 1 << ", hits: " << (daqEvent.GetSize() - 4 - m_nplanes * 2) / 6 << endl;
       // Events with pixel data have more than 4 words for TBM header/trailer and 1 for each ROC header:
       if (daqEvent.data.size() > (4 + 3 * m_nplanes)) { m_ev_filled++; m_ev_runningavg_filled++; }
 

@@ -222,8 +222,9 @@ namespace eudaq {
 
     // Iterate over all planes and check for pixel hits:
     for (size_t roc = 0; roc < m_nplanes; roc++) {
+//        std::cout<<"Roc :" << roc <<std::endl;
 
-      // We are using the event's "sensor" (m_detector) to distinguish DUT and REF:
+        // We are using the event's "sensor" (m_detector) to distinguish DUT and REF:
       StandardPlane plane(roc, m_event_type, m_detector);
       plane.SetTrigCount(evt->triggerCount());
       plane.SetTrigPhase(evt->triggerPhase());
@@ -235,12 +236,16 @@ namespace eudaq {
 
       // Store all decoded pixels belonging to this plane:
       for (std::vector<pxar::pixel>::iterator it = evt->pixels.begin(); it != evt->pixels.end(); ++it) {
-        // Check if current pixel belongs on this plane:
+
+
+          // Check if current pixel belongs on this plane:
         if (it->roc() == roc) {
           std::string identifier = (std::string) m_detector + (std::string) TString::Format("%01zu%02d%02d", roc, it->row(), it->column());
 
           float charge;
-          if (do_conversion) {
+
+          //if (do_conversion) {
+          if(false){
             charge = get_charge(vcal_vals.find(identifier)->second, it->value());
             if (charge < 0) {
               EUDAQ_WARN(std::string("Invalid cluster charge -" + to_string(charge) + "/" + to_string(it->value())));
@@ -249,8 +254,9 @@ namespace eudaq {
           } else
             charge = it->value();
 
-          //std::cout << "filling charge " <<it->value()<<" "<< charge << " "<<factor<<" "<<identifier<<std::endl;
-          if (m_rotated_pcb) { plane.PushPixel(it->row(), it->column(), charge /*it->value()*/); }
+            //std::cout << "filling charge " <<it->value()<<" "<< charge << " "<<factor<<" "<<identifier<<std::endl;
+            //std::cout << "filling row " <<it->row()<<" column "<< it->column() << " charge "<< charge <<" "<<identifier<<std::endl;
+            if (m_rotated_pcb) { plane.PushPixel(it->row(), it->column(), charge /*it->value()*/); }
           else { plane.PushPixel(it->column(), it->row(), charge /*it->value()*/); }
         }
       }
