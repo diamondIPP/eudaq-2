@@ -19,6 +19,7 @@
 #include <vector>
 #include <sched.h>
 
+
 using namespace pxar;
 using namespace std;
 
@@ -394,6 +395,9 @@ void CMSPixelProducer::DoStartRun() {
     bore->SetTag("DETECTOR", m_detector);
     bore->SetTag("PXARCORE", m_api->getVersion());
     bore->SetTag("EVENTTYPE", m_eventType);
+    string dac_file = m_config->Get("dacFile", "");
+    EUDAQ_INFO("DEVDIR: " + dac_file.substr(0, dac_file.find("/dac")));
+    bore->SetTag("DEVICEDIR", dac_file.substr(0, dac_file.find("/dac")));
     bore->SetTriggerN(0);
     SendEvent(move(bore));
     m_ev++;

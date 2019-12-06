@@ -48,7 +48,7 @@ std::vector<std::pair<std::string, uint8_t> > CMSPixelProducer::GetConfDACs(int1
   // Read ROC DAC file, no I2C address indicator is given, assuming filename is correct "as is":
   else if(i2c < 0) { filename = m_config->Get("dacFile", ""); }
   // Read ROC DAC file, I2C address is given, appending a "_Cx" with x = I2C:
-  else { filename = prepareFilename(m_config->Get("dacFile", ""),std::to_string(i2c)); }
+  else { filename = prepareFilename(m_config->Get("dacFile", ""), std::to_string(i2c)); }
 
   std::vector<std::pair<std::string,uint8_t> > dacs;
   std::ifstream file(filename);
