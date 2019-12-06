@@ -51,7 +51,7 @@ namespace eudaq {
 
     bool GetStandardSubEvent(eudaq::EventSPC in, eudaq::StandardEventSP out) const;
 
-    std::string get_event_type(const ConfigurationSPC & conf);
+//    std::string get_event_type(const ConfigurationSPC & conf);
   };
 
 }
