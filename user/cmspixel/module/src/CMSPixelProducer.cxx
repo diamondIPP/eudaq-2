@@ -395,11 +395,12 @@ void CMSPixelProducer::DoStartRun() {
     bore->SetTag("DETECTOR", m_detector);
     bore->SetTag("PXARCORE", m_api->getVersion());
     bore->SetTag("EVENTTYPE", m_eventType);
-    string dac_file = m_config->Get("dacFile", "");
+    string dac_file = m_config->Get("trimFile", "");
     EUDAQ_INFO("DEVDIR: " + dac_file.substr(0, dac_file.find("/dac")));
     bore->SetTag("DEVICEDIR", dac_file.substr(0, dac_file.find("/dac")));
     EUDAQ_INFO("SAVING TRIM VALUE: " + dac_file.substr(dac_file.size() - 2, dac_file.size() - 1));
     bore->SetTag("TRIM", dac_file.substr(dac_file.size() - 2, dac_file.size() - 1));
+    bore->SetTag("I2C", m_config->Get("i2c", "0"));
     bore->SetTriggerN(0);
     SendEvent(move(bore));
     m_ev++;
