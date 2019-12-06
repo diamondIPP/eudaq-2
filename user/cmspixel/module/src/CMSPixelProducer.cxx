@@ -398,6 +398,8 @@ void CMSPixelProducer::DoStartRun() {
     string dac_file = m_config->Get("dacFile", "");
     EUDAQ_INFO("DEVDIR: " + dac_file.substr(0, dac_file.find("/dac")));
     bore->SetTag("DEVICEDIR", dac_file.substr(0, dac_file.find("/dac")));
+    EUDAQ_INFO("SAVING TRIM VALUE: " + dac_file.substr(dac_file.size() - 2, dac_file.size() - 1));
+    bore->SetTag("TRIM", dac_file.substr(dac_file.size() - 2, dac_file.size() - 1));
     bore->SetTriggerN(0);
     SendEvent(move(bore));
     m_ev++;
@@ -479,6 +481,7 @@ void CMSPixelProducer::DoStopRun() {
     cout << "\t " << m_detector << " yield: \t" << (m_ev > 0 ? to_string(100*m_ev_filled/m_ev) : "(inf)") << "%" << endl;
     EUDAQ_USER(string("Run " + to_string(GetRunNumber()) + ", detector " + m_detector + " yield: " + (m_ev > 0 ? to_string(100*m_ev_filled/m_ev) : "(inf)")
 		      + "% (" + to_string(m_ev_filled) + "/" + to_string(m_ev) + ")"));
+    m_ev = 0;
 
   } catch (const exception & e) {
     printf("While Stopping: Caught exception: %s\n", e.what());
