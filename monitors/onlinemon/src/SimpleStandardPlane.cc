@@ -57,6 +57,7 @@ SimpleStandardPlane::SimpleStandardPlane(const std::string &name, const int id)
   is_USBPIXI4 = false;
   is_FORTIS = false;
   is_EXPLORER = false;
+  is_CMSPIX = false;
   is_UNKNOWN = true; // per default we don't know this plane
   isRotated = false;
   setPixelType(name); // set the pixel type
@@ -202,9 +203,12 @@ void SimpleStandardPlane::setPixelType(std::string name) {
     is_FORTIS = true;
     is_UNKNOWN = false;
   } else if (name == "DEPFET") {
-    is_DEPFET = true;
-    is_UNKNOWN = false;
-    AnalogPixelType = true;
+      is_DEPFET = true;
+      is_UNKNOWN = false;
+      AnalogPixelType = true;
+  } else if (name == "REF" || name == "DUT"){ // FIXME this is done later for CMSpix at OnlineMon.cxx
+      is_CMSPIX = true;
+      AnalogPixelType = true;
   } else if (name == "APIX") {
     is_APIX = true;
     is_UNKNOWN = false;

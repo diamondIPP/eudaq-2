@@ -207,8 +207,7 @@ void RootMonitor::DoReceive(eudaq::EventSP evsp) {
     string sensorname;
     if ((plane.Type() == std::string("DEPFET")) &&(plane.Sensor().length()==0)){ // FIXME ugly hack for the DEPFET
       sensorname=plane.Type();
-    }
-    else{
+    } else {
       sensorname=plane.Sensor();
     }
     // DEAL with Fortis ...
@@ -220,6 +219,15 @@ void RootMonitor::DoReceive(eudaq::EventSP evsp) {
       for (unsigned int index = 0; index < plane.HitPixels(lvl1);index++){
         SimpleStandardHit hit((int)plane.GetX(index,lvl1),(int)plane.GetY(index,lvl1));
         hit.setTOT((int)plane.GetPixel(index,lvl1)); //this stores the analog information if existent, else it stores 1
+        // FIXME ugly hack for CMSPIX, is_CMSPIX is set using plane type but we want to keep sensorname, so the same hack for DEPFET is not good enough
+        /* if(plane.Type()!=std::string("MIMOSA26") && plane.Type()!=std::string("NI"))
+              std::cout<< "PlaneType:" << plane.Type() <<
+              "  PlaneSensor" << plane.Sensor() <<
+              " sensorname " << sensorname <<
+              "  pix value: " << (int)plane.GetPixel(index,lvl1)<<
+              " IsAnalog?:  " << (simpPlane.getAnalogPixelType()?"True":"False") << std::endl; */
+          if(plane.Type()!=std::string("REF") || plane.Type()!=std::string("DUT")) {simpPlane.setAnalogPixelType(true); simpPlane.is_CMSPIX =true;}
+          //FIXME up to here!!!
         hit.setLVL1(lvl1);
           
         if (simpPlane.getAnalogPixelType()){ //this is analog pixel, apply threshold
