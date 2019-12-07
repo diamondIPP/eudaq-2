@@ -360,7 +360,7 @@ uint64_t OfflineReading(eudaq::Monitor *mon, eudaq::FileReaderSP reader, uint32_
   // DoConfigure(); //TODO setup the configure and init file.
   mon->DoStartRun();
   uint32_t ev_c = 0;
-  while(1){
+  while(true){
     auto ev = std::const_pointer_cast<eudaq::Event>(reader->GetNextEvent());
     if(!ev){
       std::cout<<"end of data file with "<< ev_c << " events" <<std::endl;
@@ -417,9 +417,7 @@ int main(int argc, const char ** argv) {
     rctrl.SetValue("tcp://localhost:44000");
     
   TApplication theApp("App", &argc, const_cast<char**>(argv),0,0);
-  RootMonitor mon(rctrl.Value(),
-		  100, 0, 1400, 700,
-                  configfile.Value(), monitorname.Value());
+  RootMonitor mon(rctrl.Value(), 100, 0, 1400, 700, configfile.Value(), monitorname.Value());
   mon.setWriteRoot(do_rootatend.IsSet());
   mon.autoReset(do_resetatend.IsSet());
   mon.setReduce(reduce.Value());
