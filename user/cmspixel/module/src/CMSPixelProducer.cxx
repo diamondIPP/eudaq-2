@@ -1,17 +1,9 @@
 #include "eudaq/Producer.hh"
 #include "eudaq/Logger.hh"
-#include "eudaq/Time.hh"
 #include "eudaq/Utils.hh"
-#include "eudaq/OptionParser.hh"
-#include "eudaq/Configuration.hh"
-#include "RConfigure.h" // Version symbols
-
 #include "api.h"
-#include "constants.h"
 #include "dictionaries.h"
-#include "log.h"
 #include "helper.h"
-
 #include "CMSPixelProducer.hh"
 
 #include <iostream>
@@ -396,10 +388,10 @@ void CMSPixelProducer::DoStartRun() {
     bore->SetTag("PXARCORE", m_api->getVersion());
     bore->SetTag("EVENTTYPE", m_eventType);
     string dac_file = m_config->Get("trimFile", "");
-    EUDAQ_INFO("DEVDIR: " + dac_file.substr(0, dac_file.find("/dac")));
     bore->SetTag("DEVICEDIR", dac_file.substr(0, dac_file.find("/dac")));
-    EUDAQ_INFO("SAVING TRIM VALUE: " + dac_file.substr(dac_file.size() - 2, dac_file.size() - 1));
     bore->SetTag("TRIM", dac_file.substr(dac_file.size() - 2, dac_file.size() - 1));
+    EUDAQ_INFO("DEVDIR: " + dac_file.substr(0, dac_file.find("/dac")));
+    EUDAQ_INFO("SAVING TRIM VALUE: " + dac_file.substr(dac_file.size() - 2, dac_file.size() - 1));
     bore->SetTag("I2C", m_config->Get("i2c", "0"));
     bore->SetTriggerN(0);
     SendEvent(move(bore));
@@ -460,9 +452,10 @@ void CMSPixelProducer::DoStopRun() {
       cout << "CMSPixel " << m_detector << " Post run read-out, sending " << daqEvents.size() << " evt." << endl;
       for(auto & daqEvent : daqEvents) {
         auto event = eudaq::Event::MakeUnique(m_event_type);
+        if (&daqEvent == &daqEvents.back())
+          event->SetEORE();
 	      event->AddBlock(0, daqEvent.data);
 	      event->SetTriggerN(m_ev++);
-//	      event->SetTriggerN(++m_ev);
 	      SendEvent(move(event));
 	      if(daqEvent.data.size() > 1) { m_ev_filled++; }
       }
