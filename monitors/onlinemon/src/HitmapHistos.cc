@@ -36,6 +36,7 @@ HitmapHistos::HitmapHistos(SimpleStandardPlane p, RootMonitor *mon)
   is_DEPFET = p.is_DEPFET;
 
 
+
   if (_maxX != -1 && _maxY != -1) {
     sprintf(out, "%s %i Raw Hitmap", _sensor.c_str(), _id);
     sprintf(out2, "h_hitmap_%s_%i", _sensor.c_str(), _id);
@@ -81,6 +82,8 @@ HitmapHistos::HitmapHistos(SimpleStandardPlane p, RootMonitor *mon)
       _totSingle = new TH1I(out2, out, 16, 0, 15);
     } else if (p.is_DEPFET) {
       _totSingle = new TH1I(out2, out, 255, -127, 127);
+    } else if (p.is_CMSPIX) {
+        _totSingle = new TH1I(out2, out, 1101, -100, 1000);
     } else {
       _totSingle = new TH1I(out2, out, 256, 0, 255);
 #ifdef EUDAQ_LIB_ROOT6
@@ -94,6 +97,8 @@ HitmapHistos::HitmapHistos(SimpleStandardPlane p, RootMonitor *mon)
     sprintf(out2, "h_totcluster_%s_%i", _sensor.c_str(), _id);
     if (p.is_USBPIXI4)
       _totCluster = new TH1I(out2, out, 80, 0, 79);
+    else if (p.is_CMSPIX)
+        _totCluster = new TH1I(out2, out, 1101, -100, 1000);
     else
       _totCluster = new TH1I(out2, out, 256, 0, 255);
 

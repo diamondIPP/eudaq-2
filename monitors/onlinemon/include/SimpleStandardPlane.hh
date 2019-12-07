@@ -90,7 +90,7 @@ public:
   bool is_FORTIS;
   bool is_EXPLORER;
   bool is_UNKNOWN;
-
+  bool is_CMSPIX;
 private:
   OnlineMonConfiguration *mon;
   bool AnalogPixelType; // dealing with pixels, that have analog information
