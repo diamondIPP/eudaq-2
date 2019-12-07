@@ -14,9 +14,7 @@ namespace eudaq {
 class CMSPixelConverterPlugin : public StdEventConverter {
 public:
   static const uint32_t m_id_factory = eudaq::cstr2hash("CMSPixel");
-
   bool Converting(EventSPC in, StandardEventSP out, ConfigurationSPC conf) const override;
-
 };
 
 namespace {

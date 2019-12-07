@@ -1,7 +1,3 @@
-#include <utility>
-
-#include <utility>
-
 #include "CMSPixelHelper.hh"
 #include <vector>
 #include "dictionaries.h"
@@ -44,135 +40,91 @@ using namespace pxar;
 
 namespace eudaq {
 
-  CMSPixelHelper::CMSPixelHelper(const EventSPC &bore, const ConfigurationSPC &cnf): do_conversion(true) {
-      if(bore->IsBORE()){
-          std::cout << "is bore with roctype: " << bore->GetTag("ROCTYPE", "estamierdanofunciona") << std::endl;
-      }
-    roc_calibrations = {{"psi46v2",           65},
-                        {"psi46digv21respin", 47},
-                        {"proc600",           47}};
+  CMSPixelHelper::CMSPixelHelper(const EventSPC & bore, const ConfigurationSPC & cnf): do_conversion(false) {
+    map<string, float> roc_calibrations = {{"psi46v2", 65}, {"psi46digv21respin", 47}, {"proc600", 47}};
+    m_calibration_factor = roc_calibrations.at(bore->GetTag("ROCTYPE", "psi46v2"));
     f_fit_function = new TF1("fitfunc", "[3]*(TMath::Erf((x-[0])/[1])+[2])", -4096, 4096);
     m_event_type = bore->GetTag("EVENTTYPE", "REF");
-//    m_event_type = get_event_type(cnf);
-    initialize(bore, cnf);
+    initialize(bore);
+    cout << "CONFIG: " << (cnf != nullptr) << endl;
   }
 
-  float CMSPixelHelper::get_charge(eudaq::VCALDict d, float val, float factor) const {
-
-    for (uint8_t i(0); i < 4; i++)
-      f_fit_function->SetParameter(i, d.pars.at(i));
-    return d.calibration_factor * f_fit_function->GetX(val);
+  float CMSPixelHelper::calc_vcal(uint16_t roc, uint16_t col, uint16_t row, uint16_t adc) const {
+    f_fit_function->SetParameters(&m_cal_parameters.at(roc).at(string(TString::Format("%02d%02d", col, row)))[0]);
+    return f_fit_function->GetX(adc);
   }
 
-  void CMSPixelHelper::initialize(const EventSPC & bore, const ConfigurationSPC & cnf) {
-    DeviceDictionary *devDict;
-    std::string roctype = bore->GetTag("ROCTYPE", "estamierdanofunciona");
-      std::string tbmtype = bore->GetTag("TBMTYPE", "tbmemulator2");
-      m_detector = bore->GetTag("DETECTOR", "");
-      std::string pcbtype = bore->GetTag("PCBTYPE", "");
-      m_rotated_pcb = pcbtype.find("-rot") != std::string::npos;
+  void CMSPixelHelper::initialize(const EventSPC & bore) {
+    std::string roctype = bore->GetTag("ROCTYPE", "psi46v2");
+    std::string tbmtype = bore->GetTag("TBMTYPE", "tbmemulator2");
+    m_detector = bore->GetTag("DETECTOR", "");
+    std::string pcbtype = bore->GetTag("PCBTYPE", "");
+    m_rotated_pcb = pcbtype.find("-rot") != std::string::npos;
 
     // Get the number of planes:
     m_nplanes = bore->GetTag("PLANES", 1);
-    m_roctype = devDict->getInstance()->getDevCode(roctype);
-      m_tbmtype = devDict->getInstance()->getDevCode(tbmtype);
+    m_roctype = DeviceDictionary::getInstance()->getDevCode(roctype);
+    m_tbmtype = DeviceDictionary::getInstance()->getDevCode(tbmtype);
     if (m_roctype == 0x0)
       EUDAQ_ERROR("Roctype" + to_string((int) m_roctype) + " not propagated correctly to CMSPixelConverterPlugin");
 
-//    if(m_conv_cfg){
-//        std::cout << "blaas0"<< std::endl;
-//        m_conv_cfg->Print();
-//    }
-
-//    read_ph_calibration(cnf); // REVERT IT BACK - IL
-
-//    m_conv_cfg->SetSection("Converter.telescopetree");
-//    decodingOffset = m_conv_cfg->Get("decoding_offset", 0);
+    read_ph_calibration(bore); // REVERT IT BACK - IL
+    // TODO: decoding Offset!
 
     std::cout << "CMSPixel Converter initialized with detector " << m_detector << ", Event Type " << m_event_type
               << ", TBM type " << tbmtype << " (" << static_cast<int>(m_tbmtype) << ")"
               << ", ROC type " << roctype << " (" << static_cast<int>(m_roctype) << ")" << std::endl;
   }
 
-  void CMSPixelHelper::read_ph_calibration(const ConfigurationSPC & cnf) {
-    std::cout << "TRY TO READ PH CALIBRATION DATA... ";
-    bool foundData(false);
-    std::string roctype = cnf->Get("roctype", "roctype", "");
-    bool is_digital = roctype.find("dig") != string::npos;
-    string fname = m_conv_cfg->Get("phCalibrationFile", "");
-    if (fname == "") fname = cnf->Get("phCalibrationFile", "");
-    if (fname == "") {
-      fname = cnf->Get("dacFile", "");
-      size_t found = fname.find_last_of("/");
-      fname = fname.substr(0, found);
+void CMSPixelHelper::read_ph_calibration(const EventSPC & bore) {
+
+  cout << "TRY TO READ PH CALIBRATION DATA... " << endl;
+  string roctype = bore->GetTag("ROCTYPE", "psi46v2");
+  string filename_base = bore->GetTag("DEVICEDIR", "");
+  filename_base = filename_base.substr(0, filename_base.rfind('/'));
+//  filename_base = "/home/micha/software/data" + filename_base.substr(filename_base.rfind('/'));
+  if (filename_base.empty())
+    return;
+  filename_base += ((roctype.find("dig") != string::npos) ? "/phCalibrationFitErr" : "/phCalibrationGErfFit") + bore->GetTag("TRIM", "");
+  vector<string> i2cs = split(bore->GetTag("i2c", "0"), " ");
+  vector<double> pars(4);
+  uint16_t col, row;
+  string dump;
+  char trash[30];
+  for (size_t iroc(0); iroc < i2cs.size(); iroc++){
+    FILE * fp;
+    char * line = nullptr;
+    size_t len = 0;
+    TString filename = filename_base + "_C" + i2cs.at(iroc) + ".dat";
+    cout << "Try to open ph calibration file in CMSPixelHelper: " << filename << endl;
+    fp = fopen(filename, "r");
+    map<string, vector<double>> tmp_par_map;
+    if (!fp){
+      cout <<  "Could not open file: " << filename << endl;
+      return;
+    } else {
+      for (uint8_t i = 0; i < 3; i++) /** jump to fourth line */
+        if (!getline(&line, &len, fp))
+          return;
+      while (fscanf(fp, "%lf %lf %lf %lf %s %hd %hd", &pars.at(0), &pars.at(1), &pars.at(2), &pars.at(3), trash, &col, &row) == 7)
+        tmp_par_map[string(TString::Format("%02d%02d", col, row))] = pars;
+      m_cal_parameters.push_back(tmp_par_map);
+      fclose(fp);
     }
-    fname += (is_digital) ? "/phCalibrationFitErr" : "/phCalibrationGErfFit";
-    std::string i2c = cnf->Get("i2c", "i2caddresses", "0");
-    string section_name = cnf->GetCurrentSectionName();
-    if (section_name.find("REF") != string::npos) foundData = read_ph_calibration_file("REF", fname, i2c, roc_calibrations.at(roctype));
-    else if (section_name.find("ANA") != string::npos) foundData = read_ph_calibration_file("ANA", fname, i2c, roc_calibrations.at(roctype));
-    else if (section_name.find("DIG") != string::npos) foundData = read_ph_calibration_file("DIG", fname, i2c, roc_calibrations.at(roctype));
-    else if (section_name.find("TRP") != string::npos) foundData = read_ph_calibration_file("TRP", fname, i2c, roc_calibrations.at(roctype));
-    else foundData = read_ph_calibration_file("DUT", fname, i2c, roc_calibrations.at(roctype));
-    /** only do a conversion if we found data */
-    do_conversion = foundData;
   }
-
-  bool CMSPixelHelper::read_ph_calibration_file(std::string roc_type, std::string fname, std::string i2cs, float factor) {
-    std::vector<std::string> vec_i2c = split(i2cs, " ");
-    size_t nRocs = vec_i2c.size();
-
-    // getting vcal-charge translation from file
-    vector<float> pars;
-    int row, col;
-    std::string dump;
-    char trash[30];
-    for (uint16_t iroc = 0; iroc < nRocs; iroc++) {
-      std::string i2c = vec_i2c.at(iroc);
-      FILE *fp;
-      char *line = nullptr;
-      size_t len = 0;
-      ssize_t read;
-
-      TString filename = fname;
-      filename += "_C" + i2c + ".dat";
-      std::cout << "Filename in CMSPixelHelper: " << filename << std::endl;
-      fp = fopen(filename, "r");
-
-      VCALDict tmp_vcaldict;
-      if (!fp) {
-//          std::cout <<  "  DID NOT FIND A FILE TO GO FROM ADC TO CHARGE!!" << std::endl;
-        return false;
-      } else {
-        // jump to fourth line
-        for (uint8_t i = 0; i < 3; i++) if (!getline(&line, &len, fp)) return false;
-
-        int q = 0;
-        while (fscanf(fp, "%f %f %f %f %s %d %d", &pars.at(0), &pars.at(1), &pars.at(2), &pars.at(3), trash, &col, &row) == 7) {
-          tmp_vcaldict.pars = pars;
-          tmp_vcaldict.calibration_factor = factor;
-          std::string identifier = roc_type + std::string(TString::Format("%01d%02d%02d", iroc, row, col));
-          q++;
-          vcal_vals[identifier] = tmp_vcaldict;
-        }
-        fclose(fp);
-      }
-    }
-    return true;
+  do_conversion = true;
+  cout << "END OF READ PH CALIBRATION: CONVERT: " << do_conversion << endl;
   }
 
   bool CMSPixelHelper::GetStandardSubEvent(eudaq::EventSPC in, eudaq::StandardEventSP out) const {
 
-    /** If we receive the EORE print the collected statistics: */
-//    if (out->IsEORE()) {
-    if (in->IsEORE()) {
-      std::cout << "Decoding statistics for detector " << m_detector << std::endl;
+    if (in->IsEORE() or in->GetEventN() % 10000 == 9999){
+      cout << "Decoding statistics for detector " << m_detector << endl;
       pxar::Log::ReportingLevel() = pxar::Log::FromString("INFO");
       decoding_stats.dump();
     }
-
     // Check if we have BORE or EORE:
-    if (in->IsBORE() || in->IsEORE()) { return true; }
+    if (in->IsBORE()) { return true; }
 
     // Check ROC type from event tags:
     if (m_roctype == 0x0) {
@@ -236,32 +188,12 @@ namespace eudaq {
       else { plane.SetSizeZS(ROC_NUMCOLS, ROC_NUMROWS, 0); }
 
       // Store all decoded pixels belonging to this plane:
-      for (std::vector<pxar::pixel>::iterator it = evt->pixels.begin(); it != evt->pixels.end(); ++it) {
-
-
-          // Check if current pixel belongs on this plane:
-        if (it->roc() == roc) {
-          std::string identifier = (std::string) m_detector + (std::string) TString::Format("%01zu%02d%02d", roc, it->row(), it->column());
-
-          float charge;
-
-          //if (do_conversion) {
-          if(false){
-            charge = get_charge(vcal_vals.find(identifier)->second, it->value());
-            if (charge < 0) {
-              EUDAQ_WARN(std::string("Invalid cluster charge -" + to_string(charge) + "/" + to_string(it->value())));
-              charge = 0;
-            }
-          } else
-            charge = it->value();
-
-            //std::cout << "filling charge " <<it->value()<<" "<< charge << " "<<factor<<" "<<identifier<<std::endl;
-            //std::cout << "filling row " <<it->row()<<" column "<< it->column() << " charge "<< charge <<" "<<identifier<<std::endl;
-            if (m_rotated_pcb) { plane.PushPixel(it->row(), it->column(), charge /*it->value()*/); }
-          else { plane.PushPixel(it->column(), it->row(), charge /*it->value()*/); }
+      for (auto & it : evt->pixels) {
+        if (it.roc() == roc) { /** Check if current pixel belongs on this plane: */
+          double charge = do_conversion ? calc_vcal(it.roc(), it.column(), it.roc(), it.value()) : it.value();
+          m_rotated_pcb ? plane.PushPixel(it.row(), it.column(), charge) : plane.PushPixel(it.column(), it.row(), charge);
         }
       }
-
       // Add plane to the output event:
       out->AddPlane(plane);
     }

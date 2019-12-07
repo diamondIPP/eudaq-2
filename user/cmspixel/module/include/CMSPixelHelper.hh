@@ -10,44 +10,34 @@ class TF1;
 
 namespace eudaq {
 
-  struct VCALDict {
-    int row;
-    int col;
-    std::vector<float> pars;
-    float calibration_factor;
-  };
-
 
   class CMSPixelHelper {
 
   private:
     uint8_t m_roctype{}, m_tbmtype{};
-    size_t m_planeid{};
     size_t m_nplanes{};
     std::string m_detector;
     bool m_rotated_pcb{};
     std::string m_event_type;
     mutable pxar::statistics decoding_stats;
     bool do_conversion{};
-    Configuration * m_conv_cfg{};
     uint8_t decodingOffset{};
     static std::vector<uint16_t> TransformRawData(const std::vector<unsigned char> & block);
 
   public:
-    std::map<std::string, float > roc_calibrations;
+    float m_calibration_factor;
     CMSPixelHelper(const EventSPC& bore, const ConfigurationSPC& cnf);
-    std::map< std::string, VCALDict> vcal_vals;
-    TF1 * f_fit_function{};
+    std::vector<std::map<std::string, std::vector<double>>> m_cal_parameters;
+    TF1 * f_fit_function;
 
     void set_conversion(bool val) { do_conversion = val; }
-    void set_config(Configuration * conv_cfg) { m_conv_cfg = conv_cfg; }
     bool get_conversion() { return do_conversion; }
-    float get_charge(VCALDict d, float val, float factor = 65.) const;
+    double get_charge(double vcal) const { return vcal * m_calibration_factor; }
+    float calc_vcal(uint16_t roc, uint16_t col, uint16_t row, uint16_t adc) const;
     std::string get_stats() { return decoding_stats.getString(); }
 
-    void initialize(const EventSPC& bore, const ConfigurationSPC& cnf);
-    void read_ph_calibration(const ConfigurationSPC & cnf);
-    bool read_ph_calibration_file(std::string roc_type, std::string fname, std::string i2cs, float factor);
+    void initialize(const EventSPC& bore);
+    void read_ph_calibration(const EventSPC & bore);
 
     bool GetStandardSubEvent(eudaq::EventSPC in, eudaq::StandardEventSP out) const;
 
