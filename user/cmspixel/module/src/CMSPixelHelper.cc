@@ -44,7 +44,7 @@ namespace eudaq {
     map<string, float> roc_calibrations = {{"psi46v2", 65}, {"psi46digv21respin", 47}, {"proc600", 47}};
     m_calibration_factor = roc_calibrations.at(bore->GetTag("ROCTYPE", "psi46v2"));
     f_fit_function = new TF1("fitfunc", "[3]*(TMath::Erf((x-[0])/[1])+[2])", -4096, 4096);
-    m_event_type = bore->GetTag("EVENTTYPE", "REF");
+    m_event_type = "CMS" + bore->GetTag("EVENTTYPE", "REF");
     initialize(bore);
     cout << "CONFIG: " << (cnf != nullptr) << endl;
   }
@@ -80,27 +80,27 @@ void CMSPixelHelper::read_ph_calibration(const EventSPC & bore) {
 
   cout << "TRY TO READ PH CALIBRATION DATA... " << endl;
   string roctype = bore->GetTag("ROCTYPE", "psi46v2");
-  string filename_base = bore->GetTag("DEVICEDIR", "");
-  filename_base = filename_base.substr(0, filename_base.rfind('/'));
+  string file_name = bore->GetTag("DEVICEDIR", "");
+  file_name = file_name.substr(0, file_name.rfind('/'));
 //  filename_base = "/home/micha/software/data" + filename_base.substr(filename_base.rfind('/'));
-  if (filename_base.empty())
+  if (file_name.empty())
     return;
-  filename_base += ((roctype.find("dig") != string::npos) ? "/phCalibrationFitErr" : "/phCalibrationGErfFit") + bore->GetTag("TRIM", "");
+  file_name += ((roctype.find("dig") != string::npos) ? "/phCalibrationFitErr" : "/phCalibrationGErfFit") + bore->GetTag("TRIM", "");
   vector<string> i2cs = split(bore->GetTag("i2c", "0"), " ");
   vector<double> pars(4);
   uint16_t col, row;
   string dump;
   char trash[30];
-  for (size_t iroc(0); iroc < i2cs.size(); iroc++){
+  for (const auto & i2c : i2cs){
     FILE * fp;
     char * line = nullptr;
     size_t len = 0;
-    TString filename = filename_base + "_C" + i2cs.at(iroc) + ".dat";
-    cout << "Try to open ph calibration file in CMSPixelHelper: " << filename << endl;
-    fp = fopen(filename, "r");
+    file_name += "_C" + i2c + ".dat";
+    cout << "Try to open ph calibration file in CMSPixelHelper: " << file_name << endl;
+    fp = fopen(file_name.c_str(), "r");
     map<string, vector<double>> tmp_par_map;
     if (!fp){
-      cout <<  "Could not open file: " << filename << endl;
+      cout <<  "Could not open file: " << file_name << endl;
       return;
     } else {
       for (uint8_t i = 0; i < 3; i++) /** jump to fourth line */
@@ -175,12 +175,9 @@ void CMSPixelHelper::read_ph_calibration(const EventSPC & bore) {
 
     // Iterate over all planes and check for pixel hits:
     for (size_t roc = 0; roc < m_nplanes; roc++) {
-//        std::cout<<"Roc :" << roc <<std::endl;
 
         // We are using the event's "sensor" (m_detector) to distinguish DUT and REF:
       StandardPlane plane(roc, m_event_type, m_detector);
-      plane.SetTrigCount(evt->triggerCount());
-      plane.SetTrigPhase(evt->triggerPhase());
 
       // Initialize the plane size (zero suppressed), set the number of pixels
       // Check which carrier PCB has been used and book planes accordingly:
@@ -191,10 +188,12 @@ void CMSPixelHelper::read_ph_calibration(const EventSPC & bore) {
       for (auto & it : evt->pixels) {
         if (it.roc() == roc) { /** Check if current pixel belongs on this plane: */
           double charge = do_conversion ? calc_vcal(it.roc(), it.column(), it.roc(), it.value()) : it.value();
-          m_rotated_pcb ? plane.PushPixel(it.row(), it.column(), charge) : plane.PushPixel(it.column(), it.row(), charge);
+          m_rotated_pcb ? plane.PushPixel(it.row(), it.column(), it.value(), charge) : plane.PushPixel(it.column(), it.row(), it.value(), charge);
         }
       }
-      // Add plane to the output event:
+      // Add plane and trigger phase to the output event:
+      out->AddTriggerPhase(evt->triggerPhase());
+      out->AddTriggerCount(evt->triggerCount());
       out->AddPlane(plane);
     }
     return true;

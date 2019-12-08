@@ -27,6 +27,11 @@ namespace eudaq {
     size_t NumPlanes() const;
     const StandardPlane &GetPlane(size_t i) const;
     StandardPlane &GetPlane(size_t i);
+    std::vector<StandardPlane> GetPlanes() const { return m_planes; }
+    void AddTriggerPhase(uint16_t tp) { m_trigger_phases.push_back(tp); }
+    void AddTriggerCount(uint64_t tc) { m_trigger_counts.push_back(tc); }
+    std::vector<uint16_t> GetTriggerPhases() const { return m_trigger_phases ;}
+    std::vector<uint16_t> GetTriggerCounts() const { return m_trigger_counts ;}
 
     /** Standard Waveform */
     StandardWaveform & AddWaveform(const StandardWaveform &);
@@ -83,6 +88,8 @@ namespace eudaq {
     std::vector<StandardWaveform> m_waveforms;
     uint64_t time_begin{0}, time_end{0};
     std::string detector_type;
+    std::vector<uint16_t> m_trigger_phases;
+    std::vector<uint16_t> m_trigger_counts;
   };
 
   inline std::ostream &operator<<(std::ostream &os, const StandardPlane &pl) {
