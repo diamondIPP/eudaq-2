@@ -83,7 +83,7 @@ HitmapHistos::HitmapHistos(SimpleStandardPlane p, RootMonitor *mon)
     } else if (p.is_DEPFET) {
       _totSingle = new TH1I(out2, out, 255, -127, 127);
     } else if (p.is_CMSPIX) {
-        _totSingle = new TH1I(out2, out, 1101, -100, 1000);
+        _totSingle = new TH1I(out2, out, 111, -100, 1000);
     } else {
       _totSingle = new TH1I(out2, out, 256, 0, 255);
 #ifdef EUDAQ_LIB_ROOT6
@@ -98,7 +98,7 @@ HitmapHistos::HitmapHistos(SimpleStandardPlane p, RootMonitor *mon)
     if (p.is_USBPIXI4)
       _totCluster = new TH1I(out2, out, 80, 0, 79);
     else if (p.is_CMSPIX)
-        _totCluster = new TH1I(out2, out, 1101, -100, 1000);
+        _totCluster = new TH1I(out2, out, 111, -100, 1000);
     else
       _totCluster = new TH1I(out2, out, 256, 0, 255);
 
