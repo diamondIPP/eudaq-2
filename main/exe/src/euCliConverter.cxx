@@ -26,8 +26,8 @@ int main(int /*argc*/, const char **argv) {
   }
   
   std::string outfile_path = file_output.Value();
-  std::string type_in = infile_path.substr(infile_path.find_last_of(".")+1);
-  std::string type_out = outfile_path.substr(outfile_path.find_last_of(".")+1);
+  std::string type_in = infile_path.substr(infile_path.find_last_of('.') + 1);
+  std::string type_out = outfile_path.substr(outfile_path.find_last_of('.') + 1);
   bool print_ev_in = iprint.Value();
   
   if(type_in=="raw")
@@ -39,8 +39,8 @@ int main(int /*argc*/, const char **argv) {
   eudaq::FileWriterUP writer;
   reader = eudaq::Factory<eudaq::FileReader>::MakeUnique(eudaq::str2hash(type_in), infile_path);
   if(!type_out.empty())
-    writer = eudaq::Factory<eudaq::FileWriter>::MakeUnique(eudaq::str2hash(type_out), outfile_path);
-  while(1){
+    writer = eudaq::Factory<eudaq::FileWriter>::MakeUnique(eudaq::str2hash(type_out), outfile_path, infile_path);
+  while(true){
     auto ev = reader->GetNextEvent();
     if(!ev)
       break;
@@ -48,6 +48,12 @@ int main(int /*argc*/, const char **argv) {
       ev->Print(std::cout);
     if(writer)
       writer->WriteEvent(ev);
+    if (ev->GetEventN() % 100 == 0){
+      std::cout << "\r" << ev->GetEventN();
+      std::flush(std::cout);
+    }
   }
+  std::cout << std::endl;
+  std::cout << std::endl;
   return 0;
 }

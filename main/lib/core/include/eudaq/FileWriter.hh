@@ -30,10 +30,10 @@ namespace eudaq {
   class DLLEXPORT FileWriter {
   public:
     FileWriter();
-    virtual ~FileWriter() {}
+    virtual ~FileWriter() = default;
     void SetConfiguration(ConfigurationSPC c) {m_conf = c;};
     ConfigurationSPC GetConfiguration() const {return m_conf;};
-    virtual void WriteEvent(EventSPC ) {};
+    virtual void WriteEvent(EventSPC) {};
     virtual uint64_t FileBytes() const {return 0;};
     static FileWriterSP Make(std::string type, std::string path);
   private:
