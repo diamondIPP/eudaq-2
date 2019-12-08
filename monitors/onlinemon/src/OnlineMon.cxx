@@ -226,7 +226,7 @@ void RootMonitor::DoReceive(eudaq::EventSP evsp) {
               " sensorname " << sensorname <<
               "  pix value: " << (int)plane.GetPixel(index,lvl1)<<
               " IsAnalog?:  " << (simpPlane.getAnalogPixelType()?"True":"False") << std::endl; */
-          if(plane.Type()!=std::string("REF") || plane.Type()!=std::string("DUT")) {simpPlane.setAnalogPixelType(true); simpPlane.is_CMSPIX =true;}
+          if(plane.Type()!=std::string("CMSREF") || plane.Type()!=std::string("CMSDUT")) {simpPlane.setAnalogPixelType(true); simpPlane.is_CMSPIX =true;}
           //FIXME up to here!!!
         hit.setLVL1(lvl1);
           
