@@ -50,6 +50,12 @@ namespace eudaq {
 		    uint32_t frame) {
       SetPixelHelper(index, x, y, (double)pix, 0, false, frame);
     }
+    void PushPixel(uint16_t x, uint16_t y, double adc, double charge){
+      m_x[0].push_back(x);
+      m_y[0].push_back(y);
+      m_pix[0].push_back(adc);
+      m_charge[0].push_back(charge);
+    }
     template <typename T>
       void PushPixel(uint32_t x, uint32_t y, T pix, uint64_t time_ps = 0, bool pivot = false,
 		     uint32_t frame = 0) {
@@ -66,6 +72,7 @@ namespace eudaq {
                          uint32_t frame);
     double GetPixel(uint32_t index, uint32_t frame) const;
     double GetPixel(uint32_t index) const;
+    double GetCharge(uint32_t index, uint32_t frame) const;
     double GetX(uint32_t index, uint32_t frame) const;
     double GetX(uint32_t index) const;
     double GetY(uint32_t index, uint32_t frame) const;
@@ -75,8 +82,6 @@ namespace eudaq {
     uint64_t GetTimestamp(uint32_t index, uint32_t frame) const;
     // NOTE this returns a timestamp in picoseconds
     uint64_t GetTimestamp(uint32_t index) const;
-    unsigned GetTrigCount() const {return m_trigger_count;}
-    unsigned GetTrigPhase() const {return m_trigger_phase;}
 
     bool GetPivot(uint32_t index, uint32_t frame = 0) const;
     void SetPivot(uint32_t index, uint32_t frame, bool PivotFlag);
@@ -100,8 +105,6 @@ namespace eudaq {
     void SetYSize(uint32_t y);
     void SetPivotPixel(uint32_t p);
     void SetFlags(FLAGS flags);
-    void SetTrigCount(unsigned trigger_count) {m_trigger_count = trigger_count;}
-    void SetTrigPhase(unsigned trigger_phase) {m_trigger_phase = trigger_phase;}
 
     uint32_t ID() const;
     const std::string &Type() const;
@@ -133,12 +136,11 @@ namespace eudaq {
     uint32_t m_ysize;
     uint32_t m_flags;
     uint32_t m_pivotpixel;
-    uint32_t m_trigger_count;
-    uint16_t m_trigger_phase;
 
     // Timestamp of this plane in picoseconds
     uint64_t m_timestamp{};
     std::vector<std::vector<pixel_t>> m_pix;
+    std::vector<std::vector<pixel_t>> m_charge;
     std::vector<std::vector<coord_t>> m_x, m_y;
     std::vector<std::vector<uint64_t>> m_time;
     std::vector<std::vector<bool>> m_pivot;

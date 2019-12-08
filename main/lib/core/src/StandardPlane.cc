@@ -69,6 +69,7 @@ namespace eudaq{
     m_xsize = w;
     m_ysize = h;
     m_pix.resize(frames);
+    m_charge.resize(frames);
     m_time.resize(GetFlags(FLAG_DIFFCOORDS) ? frames : 1);
     m_x.resize(GetFlags(FLAG_DIFFCOORDS) ? frames : 1);
     m_y.resize(GetFlags(FLAG_DIFFCOORDS) ? frames : 1);
@@ -130,6 +131,9 @@ namespace eudaq{
   double StandardPlane::GetPixel(uint32_t index) const {
     SetupResult();
     return m_result_pix->at(index);
+  }
+  double StandardPlane::GetCharge(uint32_t index, uint32_t frame) const {
+    return m_charge.at(frame).size() > index ? m_charge.at(frame).at(index) : -1;
   }
   uint64_t StandardPlane::GetTimestamp(uint32_t index, uint32_t frame) const {
       if (!GetFlags(FLAG_DIFFCOORDS))
