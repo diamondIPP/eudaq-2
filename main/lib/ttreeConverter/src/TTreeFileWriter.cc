@@ -81,7 +81,7 @@ namespace eudaq {
     m_ttree->Branch("time_end", &b_time_stamp_end, "time_end/D");
     m_ttree->Branch("n_hits", &b_n_hits);
     m_ttree->Branch("trigger_phase", &b_trigger_phase);
-    m_ttree->Branch("trigger_phase", &b_trigger_count);
+    m_ttree->Branch("trigger_count", &b_trigger_count);
 
     // telescope
     m_ttree->Branch("column", &b_column);
