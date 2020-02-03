@@ -40,7 +40,7 @@ using namespace pxar;
 
 namespace eudaq {
 
-  CMSPixelHelper::CMSPixelHelper(const EventSPC & bore, const ConfigurationSPC & cnf): do_conversion(false) {
+  CMSPixelHelper::CMSPixelHelper(const EventSPC & bore, const ConfigurationSPC & cnf): do_conversion(false), decodingOffset(25) {
     map<string, float> roc_calibrations = {{"psi46v2", 65}, {"psi46digv21respin", 47}, {"proc600", 47}};
     m_calibration_factor = roc_calibrations.at(bore->GetTag("ROCTYPE", "psi46v2"));
     f_fit_function = new TF1("fitfunc", "[3]*(TMath::Erf((x-[0])/[1])+[2])", -4096, 4096);
@@ -147,7 +147,8 @@ void CMSPixelHelper::read_ph_calibration(const EventSPC & bore) {
     passthroughSplitter splitter;
     dtbEventDecoder decoder;
     // todo: read this by a config file or even better, write it to the data!
-    decoder.setOffset(decodingOffset);
+    vector<float> offsets(16, decodingOffset);
+    decoder.setBlackOffsets(offsets);
     dataSink < pxar::Event * > Eventpump;
     pxar::Event *evt;
     try {
