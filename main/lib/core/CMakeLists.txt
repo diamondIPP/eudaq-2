@@ -5,7 +5,7 @@ find_package(ROOT QUIET)
 cmake_dependent_option(StandardWaveform "StandardWaveform (requires ROOT)" OFF "ROOT_FOUND" OFF)
 
 IF(StandardWaveform)
-  include_directories(${ROOT_INCLUDE_DIR})
+  include_directories(${ROOT_INCLUDE_DIRS})
   if(ROOT_USE_FILE)
     include(${ROOT_USE_FILE})
   endif()
