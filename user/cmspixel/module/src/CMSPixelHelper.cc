@@ -118,7 +118,7 @@ void CMSPixelHelper::read_ph_calibration(const EventSPC & bore) {
 
   bool CMSPixelHelper::GetStandardSubEvent(eudaq::EventSPC in, eudaq::StandardEventSP out) const {
 
-    if (in->IsEORE() or in->GetEventN() % 10000 == 9999){
+    if (in->IsEORE() or out->IsEORE()){ // or in->GetEventN() % 10000 == 9999){
       cout << "Decoding statistics for detector " << m_detector << endl;
       pxar::Log::ReportingLevel() = pxar::Log::FromString("INFO");
       decoding_stats.dump();
