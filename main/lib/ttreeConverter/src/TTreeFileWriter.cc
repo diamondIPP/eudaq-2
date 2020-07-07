@@ -99,15 +99,17 @@ namespace eudaq {
     b_row.resize(m_n_planes, new int[m_max_hits]);
     b_adc.resize(m_n_planes, new int[m_max_hits]);
     b_charge.resize(m_n_planes, new double[m_max_hits]);
-    b_trigger_phase.resize(m_n_cms_pixels);
-    b_trigger_count.resize(m_n_cms_pixels);
+    b_trigger_phase.resize(m_n_cms_pixels, 0);
+    b_trigger_count.resize(m_n_cms_pixels, 0);
     m_init_vectors = true;
   }
 
   void TTreeFileWriter::FillVectors(const StandardEventSPC & stdev) {
 
-    b_trigger_phase = stdev->GetTriggerPhases();
-    b_trigger_count = stdev->GetTriggerCounts();
+    for (uint8_t i(0); i < stdev->GetTriggerPhases().size(); i++ )
+      b_trigger_phase.at(i) = stdev->GetTriggerPhases().at(i);
+    for (uint8_t i(0); i < stdev->GetTriggerCounts().size(); i++ )
+      b_trigger_count.at(i) = stdev->GetTriggerCounts().at(i);
     for (size_t i(0); i < stdev->NumPlanes(); i++){
       const auto & plane = stdev->GetPlane(i);
       b_n_hits.at(i) = plane.HitPixels();
