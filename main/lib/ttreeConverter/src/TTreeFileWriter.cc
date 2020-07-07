@@ -114,6 +114,8 @@ namespace eudaq {
       uint16_t j(0);
       for (size_t i_frame(0); i_frame < plane.NumFrames(); i_frame++)
         for (size_t i_hit(0); i_hit < plane.HitPixels(i_frame); i_hit++){
+          if (j == m_max_hits - 1)  // stop writing if the maximum size is reached
+            continue;
           b_column.at(i)[j] = uint16_t(plane.GetX(i_hit, i_frame));
           b_row.at(i)[j] = uint16_t(plane.GetY(i_hit, i_frame));
           b_adc.at(i)[j] = uint16_t(plane.GetPixel(i_hit, i_frame));
