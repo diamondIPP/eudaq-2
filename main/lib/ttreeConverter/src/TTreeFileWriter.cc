@@ -28,7 +28,6 @@ namespace eudaq {
 	  string foutput(FileNamer(m_filepattern).Set('R', m_run_n));
     gROOT->ProcessLine("gErrorIgnoreLevel = 5001;");
     gROOT->ProcessLine("#include <vector>");
-    gInterpreter->GenerateDictionary("vector<vector<Float_t> >;vector<vector<UShort_t> >");
     EUDAQ_INFO("Preparing the outputfile: " + foutput);
     m_tfile = new TFile(foutput.c_str(), "RECREATE");
     m_event_tree = new TTree("Event", "Event Information");
