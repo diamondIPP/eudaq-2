@@ -36,9 +36,12 @@ namespace eudaq{
     std::vector<int*> b_column;
     std::vector<int*> b_row;
     std::vector<int*> b_adc;
+    std::vector<int*> b_timing;
+    std::vector<int*> b_hit_in_cluster;
     std::vector<double*> b_charge;
     std::vector<uint16_t> b_trigger_phase;
     std::vector<uint16_t> b_trigger_count;
+
   };
 }
 

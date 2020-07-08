@@ -81,6 +81,8 @@ namespace eudaq {
       m_plane_trees.at(i_plane)->Branch("PixX", b_column.at(i_plane), "PixX[NHits]/I");
       m_plane_trees.at(i_plane)->Branch("PixY", b_row.at(i_plane), "PixY[NHits]/I");
       m_plane_trees.at(i_plane)->Branch("Value", b_adc.at(i_plane), "Value[NHits]/I");
+      m_plane_trees.at(i_plane)->Branch("Timing", b_timing.at(i_plane), "Timing[NHits]/I");
+      m_plane_trees.at(i_plane)->Branch("HitInCluster", b_hit_in_cluster.at(i_plane), "HitInCluster[NHits]/I");
       if (i_plane >= m_n_telescope_planes){
         m_plane_trees.at(i_plane)->Branch("TriggerPhase", &b_trigger_phase.at(i_plane - m_n_telescope_planes), "TriggerPhase/s");
         m_plane_trees.at(i_plane)->Branch("TriggerCount", &b_trigger_count.at(i_plane - m_n_telescope_planes), "TriggerCount/s");
@@ -99,8 +101,16 @@ namespace eudaq {
     b_row.resize(m_n_planes, new int[m_max_hits]);
     b_adc.resize(m_n_planes, new int[m_max_hits]);
     b_charge.resize(m_n_planes, new double[m_max_hits]);
+    b_timing.resize(m_n_planes, new int[m_max_hits]);
+    b_hit_in_cluster.resize(m_n_planes, new int[m_max_hits]);
     b_trigger_phase.resize(m_n_cms_pixels, 0);
     b_trigger_count.resize(m_n_cms_pixels, 0);
+    // these vectors are required for proteus
+    for (uint8_t ipl(0); ipl < m_n_planes; ipl++) {
+      for (unsigned i(0); i < m_max_hits; i++) {
+        b_timing.at(ipl)[i] = 0;
+        b_hit_in_cluster.at(ipl)[i] = 0; }
+    }
     m_init_vectors = true;
   }
 
