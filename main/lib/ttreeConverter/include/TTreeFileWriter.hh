@@ -32,6 +32,8 @@ namespace eudaq{
     /** Branches */
     uint32_t b_event_nr;
     uint64_t b_time_stamp_begin, b_time_stamp_end;
+    uint64_t b_frame_number, b_trigger_time;
+    bool b_invalid;
     std::vector<int> b_n_hits;
     std::vector<int*> b_column;
     std::vector<int*> b_row;

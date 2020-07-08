@@ -22,7 +22,8 @@ namespace eudaq {
   }
 
   TTreeFileWriter::TTreeFileWriter(string out, const string & in) : m_filepattern(move(out)), m_config(nullptr), m_n_planes(0), m_n_cms_pixels(0),
-                                                                    m_init_vectors(false), m_max_hits(500), b_time_stamp_begin(0), b_time_stamp_end(0) {
+                                                                    m_init_vectors(false), m_max_hits(500), b_time_stamp_begin(0), b_time_stamp_end(0),
+                                                                    b_frame_number(0), b_trigger_time(0), b_invalid(false){
 
     m_run_n = stoi(in.substr(in.rfind('/') + 4, in.rfind('_') - in.rfind('/') - 4));
 	  string foutput(FileNamer(m_filepattern).Set('R', m_run_n));
@@ -88,9 +89,10 @@ namespace eudaq {
         m_plane_trees.at(i_plane)->Branch("TriggerCount", &b_trigger_count.at(i_plane - m_n_telescope_planes), "TriggerCount/s");
       }
     }
-    m_event_tree->Branch("EventNumber", &b_event_nr, "EventNumber/i");
     m_event_tree->Branch("TimeStamp", &b_time_stamp_begin, "TimeStamp/l");
-    m_event_tree->Branch("TimeBegin", &b_time_stamp_begin, "TimeBegin/l");
+    m_event_tree->Branch("FrameNumber", &b_frame_number, "FrameNumber/l");
+    m_event_tree->Branch("TriggerTime", &b_time_stamp_begin, "TriggerTime/l");
+    m_event_tree->Branch("Invalid", &b_invalid, "Invalid/O");
     m_event_tree->Branch("TimeEnd", &b_time_stamp_end, "TimeEnd/l");
   }
 
@@ -136,6 +138,7 @@ namespace eudaq {
         }
       m_plane_trees.at(i)->Fill();
     }
+    b_frame_number++;
   }
 
   uint8_t TTreeFileWriter::FindNCMSPixels(const EventSPC & ev) {
