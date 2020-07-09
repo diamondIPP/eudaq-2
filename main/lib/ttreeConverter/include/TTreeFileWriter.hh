@@ -15,8 +15,9 @@ namespace eudaq{
     void SetBranches();
     void InitVectors();
     void InitTrees();
-    void FillVectors(const StandardEventSPC& stdev);
-    static uint8_t FindNCMSPixels(const EventSPC& ev);
+    void InitPlaneIndices(const EventSPC & stdev);
+    void FillVectors(const StandardEventSPC & stdev);
+    static uint8_t FindNCMSPixels(const EventSPC & ev);
 
   private:
     std::string m_filepattern;
@@ -26,6 +27,7 @@ namespace eudaq{
     std::vector<TTree*> m_plane_trees;
     ConfigurationSPC m_config;
     uint8_t m_n_planes, m_n_telescope_planes, m_n_cms_pixels;
+    std::vector<uint8_t> m_plane_indices;
     bool m_init_vectors;
     uint16_t m_max_hits;
 

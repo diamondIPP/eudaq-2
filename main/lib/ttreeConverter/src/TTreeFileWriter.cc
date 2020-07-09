@@ -21,9 +21,9 @@ namespace eudaq {
     auto dummy11 = Factory<FileWriter>::Register<TTreeFileWriter, std::string&&, std::string&&>(cstr2hash("root"));
   }
 
-  TTreeFileWriter::TTreeFileWriter(string out, const string & in) : m_filepattern(move(out)), m_config(nullptr), m_n_planes(0), m_n_cms_pixels(0),
-                                                                    m_init_vectors(false), m_max_hits(500), b_time_stamp_begin(0), b_time_stamp_end(0),
-                                                                    b_frame_number(0), b_trigger_time(0), b_invalid(false){
+  TTreeFileWriter::TTreeFileWriter(string out, const string & in) : m_filepattern(move(out)), m_config(nullptr), m_n_planes(0), m_n_telescope_planes(0),
+                                                                    m_n_cms_pixels(0), m_init_vectors(false), m_max_hits(500), b_event_nr(0), b_time_stamp_begin(0),
+                                                                    b_time_stamp_end(0), b_frame_number(0), b_trigger_time(0), b_invalid(false){
 
     m_run_n = stoi(in.substr(in.rfind('/') + 4, in.rfind('_') - in.rfind('/') - 4));
 	  string foutput(FileNamer(m_filepattern).Set('R', m_run_n));
@@ -32,6 +32,7 @@ namespace eudaq {
     EUDAQ_INFO("Preparing the outputfile: " + foutput);
     m_tfile = new TFile(foutput.c_str(), "RECREATE");
     m_event_tree = new TTree("Event", "Event Information");
+    m_plane_indices = {};
   }
 
   TTreeFileWriter::~TTreeFileWriter () {
@@ -64,6 +65,7 @@ namespace eudaq {
         m_n_planes = stdev->NumPlanes();
         m_n_cms_pixels = FindNCMSPixels(ev);
         m_n_telescope_planes = m_n_planes - m_n_cms_pixels;
+        InitPlaneIndices(ev);
         InitTrees();
         InitVectors();
         SetBranches();
@@ -77,7 +79,7 @@ namespace eudaq {
 
   void TTreeFileWriter::SetBranches() {
 
-    for (size_t i_plane(0); i_plane < m_n_planes; i_plane++){
+    for (auto i_plane: m_plane_indices){
       m_plane_trees.at(i_plane)->Branch("NHits", &b_n_hits.at(i_plane), "NHits/I");
       m_plane_trees.at(i_plane)->Branch("PixX", b_column.at(i_plane), "PixX[NHits]/I");
       m_plane_trees.at(i_plane)->Branch("PixY", b_row.at(i_plane), "PixY[NHits]/I");
@@ -139,14 +141,16 @@ namespace eudaq {
       m_plane_trees.at(i)->Fill();
     }
     b_frame_number++;
+    b_event_nr++;
   }
 
   uint8_t TTreeFileWriter::FindNCMSPixels(const EventSPC & ev) {
 
     uint8_t n(0);
-    for (const auto & sev: ev->GetSubEvents())
-      if (sev->GetDescription().find("CMS") != string::npos)
-        n++;
+    for (const auto & sev: ev->GetSubEvents()) {
+      if (sev->GetDescription().find("CMS") != string::npos){
+        n++; }
+    }
     return n;
   }
 
@@ -159,4 +163,18 @@ namespace eudaq {
       m_plane_trees.push_back(new TTree("Hits", "Hit Information"));
     }
   }
+
+  void TTreeFileWriter::InitPlaneIndices(const EventSPC & stdev) {
+    /** REF and DUT plane may change the position in the data ... correct for that! */
+
+    for (uint8_t i(0); i < m_n_telescope_planes; i++)
+      m_plane_indices.emplace_back(i);
+    for (const auto & sev: stdev->GetSubEvents()) {
+      if (sev->GetDescription().find("REF") != string::npos){
+        m_plane_indices.emplace_back(m_n_telescope_planes); }
+      if (sev->GetDescription().find("DUT") != string::npos){
+        m_plane_indices.emplace_back(m_n_telescope_planes + 1); }
+    }
+  }
+
 }
