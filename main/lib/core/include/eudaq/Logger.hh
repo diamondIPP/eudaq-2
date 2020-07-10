@@ -15,6 +15,11 @@ namespace eudaq {
 #define EUDAQ_LOG_CONNECT(type, name, server)                                  \
   ::eudaq::GetLogger().Connect(type, name, server)
 
+#define EUDAQ_OUT(msg, type)                                                  \
+  ::eudaq::GetLogger().SendLogMessage(                                         \
+      ::eudaq::LogMessage(msg, ::eudaq::LogMessage::LVL_##INFO)               \
+          .SetLocation(__FILE__, __LINE__, EUDAQ_FUNC).SetSender(type))        \
+
 #define EUDAQ_LOG(level, msg)                                                  \
   ::eudaq::GetLogger().SendLogMessage(                                         \
       ::eudaq::LogMessage(msg, ::eudaq::LogMessage::LVL_##level)               \
