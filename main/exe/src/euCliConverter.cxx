@@ -10,6 +10,7 @@ int main(int /*argc*/, const char **argv) {
   eudaq::Option<std::string> file_output(op, "o", "output", "", "string","output file");
   eudaq::OptionFlag iprint(op, "ip", "iprint", "enable print of input Event");
   eudaq::Option<size_t> max_events(op, "m", "max_events", 0, "maximum number of events to be converted");
+  eudaq::Option<size_t> skip_events(op, "s", "skip_events", 0, "number of events to skip");
 
   try{
     op.Parse(argv); }
@@ -38,15 +39,17 @@ int main(int /*argc*/, const char **argv) {
     writer = eudaq::Factory<eudaq::FileWriter>::MakeUnique(eudaq::str2hash(type_out), outfile_path, infile_path);
   while(true){
     auto ev = reader->GetNextEvent();
+    if (skip_events.Value() > 0){
+      if (ev->GetEventNumber() > 0 and ev->GetEventNumber() < skip_events.Value()){
+        continue; } }
     if(!ev)
       break;
     if(print_ev_in)
       ev->Print(std::cout);
     if(writer)
       writer->WriteEvent(ev);
-    if (ev->GetEventN() % 100 == 0 and ev->GetEventN()){
-      std::cout << "\r" << ev->GetEventN();
-      std::flush(std::cout); }
+    if (ev->GetEventN() % 1000 == 0 and ev->GetEventN()) {
+      std::cout << "\r" << ev->GetEventN() << std::flush; }
     if (max_events.Value() > 0) {
       if (ev->GetEventN() > max_events.Value()) {
         break; } }

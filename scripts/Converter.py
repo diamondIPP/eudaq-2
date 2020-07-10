@@ -15,6 +15,7 @@ parser.add_argument('run', nargs='?', default=None, type=int)
 parser.add_argument('-tc', nargs='?', default=None)
 parser.add_argument('-ip', action='store_true')
 parser.add_argument('-m', nargs='?', default=0, type=int)
+parser.add_argument('-s', nargs='?', default=0, type=int)
 
 args = parser.parse_args()
 
@@ -33,6 +34,7 @@ print('Converting run {0}'.format(basename(run_str)))
 out = 'run{:04d}.root'.format(args.run if args.run is not None else int(basename(run_str).split('_')[0].strip('run')))
 
 max_events = ['-m', str(args.m)] if args.m else []
-cmd_list = [join(eudaq_dir, 'bin', 'euCliConverter'), '-i', run_str, '-o', out] + (['-ip'] if args.ip else []) + max_events
+skip_events = ['-s', str(args.s)] if args.s else []
+cmd_list = [join(eudaq_dir, 'bin', 'euCliConverter'), '-i', run_str, '-o', out] + (['-ip'] if args.ip else []) + max_events + skip_events
 print('executing:', ' '.join(cmd_list))
 check_call(cmd_list)
