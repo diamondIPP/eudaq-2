@@ -3,6 +3,7 @@
 #include "eudaq/FileWriter.hh"
 #include "eudaq/FileReader.hh"
 #include <iostream>
+#include "eudaq/Utils.hh"
 
 int main(int /*argc*/, const char **argv) {
   eudaq::OptionParser op("EUDAQ Command Line DataConverter", "2.0", "The Data Converter launcher of EUDAQ");
@@ -55,6 +56,6 @@ int main(int /*argc*/, const char **argv) {
         break; } }
   }
   std::cout << std::endl;
-  std::cout << std::endl;
+  EUDAQ_INFO_OUT("Finished", "Converter");
   return 0;
 }
