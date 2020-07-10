@@ -31,7 +31,7 @@ namespace eudaq {
 	  string foutput(FileNamer(m_filepattern).Set('R', m_run_n));
     gROOT->ProcessLine("gErrorIgnoreLevel = 5001;");
     gROOT->ProcessLine("#include <vector>");
-    EUDAQ_OUT("Preparing the outputfile: " + foutput, m_log_type);
+    EUDAQ_INFO_OUT("Preparing the outputfile: " + foutput, m_log_type);
     m_tfile = new TFile(foutput.c_str(), "RECREATE");
     m_event_tree = new TTree("Event", "Event Information");
     m_plane_indices = {};
@@ -73,10 +73,13 @@ namespace eudaq {
         SetBranches();
       }
     }
-    FillVectors(stdev);
-    if (m_init_vectors){
-      m_event_tree->Fill();
-    }
+    if (stdev->NumPlanes() == m_n_planes){  // only write the event if we have the correct number of planes...
+      FillVectors(stdev);
+      if (m_init_vectors){
+        m_event_tree->Fill(); }
+    } else {
+      string msg = TString::Format("Incorrect number of planes (%u) in event %d", int(stdev->NumPlanes()), b_event_nr).Data();
+      EUDAQ_WARN_OUT(msg, m_log_type); }
   }
 
   void TTreeFileWriter::SetBranches() {
@@ -130,8 +133,8 @@ namespace eudaq {
       const auto & plane = stdev->GetPlane(m_plane_indices.at(i));
       b_n_hits.at(i) = plane.HitPixels();
       uint16_t j(0);
-      for (size_t i_frame(0); i_frame < plane.NumFrames(); i_frame++)
-        for (size_t i_hit(0); i_hit < plane.HitPixels(i_frame); i_hit++){
+      for (size_t i_frame(0); i_frame < plane.NumFrames(); i_frame++) {
+        for (size_t i_hit(0); i_hit < plane.HitPixels(i_frame); i_hit++) {
           if (j == m_max_hits - 1)  // stop writing if the maximum size is reached
             continue;
           b_column.at(i)[j] = uint16_t(plane.GetX(i_hit, i_frame));
@@ -140,10 +143,10 @@ namespace eudaq {
 //          b_charge.at(i)[j] = uint16_t(plane.GetCharge(i_hit, i_frame));
           j++;
         }
+      }
       m_plane_trees.at(i)->Fill();
     }
     b_frame_number++;
-    b_event_nr++;
   }
 
   uint8_t TTreeFileWriter::FindNCMSPixels(const EventSPC & ev) {
@@ -178,7 +181,7 @@ namespace eudaq {
         m_plane_indices.emplace_back(m_n_telescope_planes + 1); }
     }
     vector<int> out(m_plane_indices.begin(), m_plane_indices.end());
-    EUDAQ_OUT("Initialising plane order: " + to_string(out, " "), m_log_type);
+    EUDAQ_INFO_OUT("Initialising plane order: " + to_string(out, " "), m_log_type);
   }
 
 }
