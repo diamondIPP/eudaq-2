@@ -5,6 +5,7 @@
 #include "StdEventConverter.hh"
 #include "TTreeFileWriter.hh"
 #include <utility>
+#include "Utils.hh"
 
 #include "TFile.h"
 #include "TTree.h"
@@ -21,15 +22,16 @@ namespace eudaq {
     auto dummy11 = Factory<FileWriter>::Register<TTreeFileWriter, std::string&&, std::string&&>(cstr2hash("root"));
   }
 
-  TTreeFileWriter::TTreeFileWriter(string out, const string & in) : m_filepattern(move(out)), m_config(nullptr), m_n_planes(0), m_n_telescope_planes(0),
-                                                                    m_n_cms_pixels(0), m_init_vectors(false), m_max_hits(500), b_event_nr(0), b_time_stamp_begin(0),
-                                                                    b_time_stamp_end(0), b_frame_number(0), b_trigger_time(0), b_invalid(false){
+  TTreeFileWriter::TTreeFileWriter(string out, const string & in) : m_log_type("TreeWriter"), m_filepattern(move(out)), m_config(nullptr), m_n_planes(0),
+                                                                    m_n_telescope_planes(0), m_n_cms_pixels(0), m_init_vectors(false), m_max_hits(500),
+                                                                    b_event_nr(0), b_time_stamp_begin(0),  b_time_stamp_end(0), b_frame_number(0), b_trigger_time(0),
+                                                                    b_invalid(false) {
 
     m_run_n = stoi(in.substr(in.rfind('/') + 4, in.rfind('_') - in.rfind('/') - 4));
 	  string foutput(FileNamer(m_filepattern).Set('R', m_run_n));
     gROOT->ProcessLine("gErrorIgnoreLevel = 5001;");
     gROOT->ProcessLine("#include <vector>");
-    EUDAQ_INFO("Preparing the outputfile: " + foutput);
+    EUDAQ_OUT("Preparing the outputfile: " + foutput, m_log_type);
     m_tfile = new TFile(foutput.c_str(), "RECREATE");
     m_event_tree = new TTree("Event", "Event Information");
     m_plane_indices = {};
@@ -167,14 +169,16 @@ namespace eudaq {
   void TTreeFileWriter::InitPlaneIndices(const EventSPC & stdev) {
     /** REF and DUT plane may change the position in the data ... correct for that! */
 
-    for (uint8_t i(0); i < m_n_telescope_planes; i++)
-      m_plane_indices.emplace_back(i);
+    for (uint8_t i(0); i < m_n_telescope_planes; i++) {
+      m_plane_indices.emplace_back(i); }
     for (const auto & sev: stdev->GetSubEvents()) {
       if (sev->GetDescription().find("REF") != string::npos){
         m_plane_indices.emplace_back(m_n_telescope_planes); }
       if (sev->GetDescription().find("DUT") != string::npos){
         m_plane_indices.emplace_back(m_n_telescope_planes + 1); }
     }
+    vector<int> out(m_plane_indices.begin(), m_plane_indices.end());
+    EUDAQ_OUT("Initialising plane order: " + to_string(out, " "), m_log_type);
   }
 
 }

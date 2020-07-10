@@ -20,6 +20,7 @@ namespace eudaq{
     static uint8_t FindNCMSPixels(const EventSPC & ev);
 
   private:
+    std::string m_log_type;
     std::string m_filepattern;
     uint32_t m_run_n;
     TFile * m_tfile;
