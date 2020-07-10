@@ -81,7 +81,7 @@ namespace eudaq {
 
   void TTreeFileWriter::SetBranches() {
 
-    for (auto i_plane: m_plane_indices){
+    for (uint8_t i_plane(0); i_plane < m_n_planes; i_plane++){
       m_plane_trees.at(i_plane)->Branch("NHits", &b_n_hits.at(i_plane), "NHits/I");
       m_plane_trees.at(i_plane)->Branch("PixX", b_column.at(i_plane), "PixX[NHits]/I");
       m_plane_trees.at(i_plane)->Branch("PixY", b_row.at(i_plane), "PixY[NHits]/I");
@@ -126,8 +126,8 @@ namespace eudaq {
       b_trigger_phase.at(i) = stdev->GetTriggerPhases().at(i);
     for (uint8_t i(0); i < stdev->GetTriggerCounts().size(); i++ )
       b_trigger_count.at(i) = stdev->GetTriggerCounts().at(i);
-    for (size_t i(0); i < stdev->NumPlanes(); i++){
-      const auto & plane = stdev->GetPlane(i);
+    for (uint8_t i(0); i < m_n_planes; i++){
+      const auto & plane = stdev->GetPlane(m_plane_indices.at(i));
       b_n_hits.at(i) = plane.HitPixels();
       uint16_t j(0);
       for (size_t i_frame(0); i_frame < plane.NumFrames(); i_frame++)
