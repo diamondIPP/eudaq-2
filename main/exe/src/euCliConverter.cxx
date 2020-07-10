@@ -9,6 +9,7 @@ int main(int /*argc*/, const char **argv) {
   eudaq::Option<std::string> file_input(op, "i", "input", "", "string","input file");
   eudaq::Option<std::string> file_output(op, "o", "output", "", "string","output file");
   eudaq::OptionFlag iprint(op, "ip", "iprint", "enable print of input Event");
+  eudaq::Option<size_t> max_events(op, "m", "max_events", 0, "maximum number of events to be converted");
 
   try{
     op.Parse(argv); }
@@ -43,9 +44,12 @@ int main(int /*argc*/, const char **argv) {
       ev->Print(std::cout);
     if(writer)
       writer->WriteEvent(ev);
-    if (ev->GetEventN() % 100 == 0){
+    if (ev->GetEventN() % 100 == 0 and ev->GetEventN()){
       std::cout << "\r" << ev->GetEventN();
       std::flush(std::cout); }
+    if (max_events.Value() > 0) {
+      if (ev->GetEventN() > max_events.Value()) {
+        break; } }
   }
   std::cout << std::endl;
   std::cout << std::endl;
