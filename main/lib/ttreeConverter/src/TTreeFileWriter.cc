@@ -24,7 +24,7 @@ namespace eudaq {
 
   TTreeFileWriter::TTreeFileWriter(string out, const string & in) : m_log_type("TreeWriter"), m_filepattern(move(out)), m_config(nullptr), m_n_planes(0),
                                                                     m_n_telescope_planes(0), m_n_cms_pixels(0), m_init_vectors(false), m_max_hits(500),
-                                                                    b_event_nr(0), b_time_stamp_begin(0),  b_time_stamp_end(0), b_frame_number(0), b_trigger_time(0),
+                                                                    b_event_nr(0), b_time_stamp_begin(0),  b_time_stamp_end(0), b_frame_number(-1), b_trigger_time(0),
                                                                     b_invalid(false) {
 
     m_run_n = stoi(in.substr(in.rfind('/') + 4, in.rfind('_') - in.rfind('/') - 4));
@@ -74,8 +74,8 @@ namespace eudaq {
       }
     }
     if (stdev->NumPlanes() == m_n_planes){  // only write the event if we have the correct number of planes...
-      FillVectors(stdev);
-      if (m_init_vectors){
+      if (m_init_vectors and stdev->NumPlanes() == m_n_planes) {  // only write the event if we have the correct number of planes...
+        FillVectors(stdev);
         m_event_tree->Fill(); }
     } else {
       string msg = TString::Format("Incorrect number of planes (%u) in event %d", int(stdev->NumPlanes()), b_event_nr).Data();
