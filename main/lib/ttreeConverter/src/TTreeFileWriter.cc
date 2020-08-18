@@ -126,9 +126,9 @@ namespace eudaq {
   void TTreeFileWriter::FillVectors(const StandardEventSPC & stdev) {
 
     for (uint8_t i(0); i < stdev->GetTriggerPhases().size(); i++ )
-      b_trigger_phase.at(i) = stdev->GetTriggerPhases().at(i);
+      b_trigger_phase.at(m_dut_indices.at(i)) = stdev->GetTriggerPhases().at(i);
     for (uint8_t i(0); i < stdev->GetTriggerCounts().size(); i++ )
-      b_trigger_count.at(i) = stdev->GetTriggerCounts().at(i);
+      b_trigger_count.at(m_dut_indices.at(i)) = stdev->GetTriggerCounts().at(i);
     for (uint8_t i(0); i < m_n_planes; i++){
       const auto & plane = stdev->GetPlane(m_plane_indices.at(i));
       b_n_hits.at(i) = plane.HitPixels();
@@ -180,8 +180,13 @@ namespace eudaq {
       if (sev->GetDescription().find("DUT") != string::npos){
         m_plane_indices.emplace_back(m_n_telescope_planes + 1); }
     }
+    for (uint8_t i(0); i < m_n_cms_pixels; i++) {
+      m_dut_indices.emplace_back(m_plane_indices.at(m_n_telescope_planes + i) - m_n_telescope_planes); }
+
     vector<int> out(m_plane_indices.begin(), m_plane_indices.end());
     EUDAQ_INFO_OUT("Initialising plane order: " + to_string(out, " "), m_log_type);
+    vector<int> dutout(m_dut_indices.begin(), m_dut_indices.end());
+    EUDAQ_INFO_OUT("Initialising dut indices: " + to_string(dutout, " "), m_log_type);
   }
 
 }

@@ -29,6 +29,7 @@ namespace eudaq{
     ConfigurationSPC m_config;
     uint8_t m_n_planes, m_n_telescope_planes, m_n_cms_pixels;
     std::vector<uint8_t> m_plane_indices;
+    std::vector<uint8_t> m_dut_indices;
     bool m_init_vectors;
     uint16_t m_max_hits;
 
