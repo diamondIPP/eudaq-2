@@ -176,13 +176,13 @@ namespace eudaq {
       if (sev->GetDescription().find("NiRawData") != string::npos){
         for (uint8_t i(0); i < m_n_telescope_planes; i++) {
           m_plane_indices.emplace_back(i); }}
-      if (sev->GetDescription().find("REF") != string::npos){
-        m_plane_indices.emplace_back(m_n_telescope_planes); }
-      if (sev->GetDescription().find("DUT") != string::npos){
-        m_plane_indices.emplace_back(m_n_telescope_planes + 1); }
+      else if (sev->GetDescription().find("REF") != string::npos){
+        m_plane_indices.emplace_back(m_n_telescope_planes);
+        m_dut_indices.emplace_back(0); }
+      else if (sev->GetDescription().find("DUT") != string::npos){
+        m_plane_indices.emplace_back(m_n_telescope_planes + 1);
+        m_dut_indices.emplace_back(1); }
     }
-    for (uint8_t i(0); i < m_n_cms_pixels; i++) {
-      m_dut_indices.emplace_back(m_plane_indices.at(m_n_telescope_planes + i) - m_n_telescope_planes); }
 
     vector<int> out(m_plane_indices.begin(), m_plane_indices.end());
     EUDAQ_INFO_OUT("Initialising plane order: " + to_string(out, " "), m_log_type);
