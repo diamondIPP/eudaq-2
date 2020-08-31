@@ -172,9 +172,10 @@ namespace eudaq {
   void TTreeFileWriter::InitPlaneIndices(const EventSPC & stdev) {
     /** REF and DUT plane may change the position in the data ... correct for that! */
 
-    for (uint8_t i(0); i < m_n_telescope_planes; i++) {
-      m_plane_indices.emplace_back(i); }
     for (const auto & sev: stdev->GetSubEvents()) {
+      if (sev->GetDescription().find("NiRawData") != string::npos){
+        for (uint8_t i(0); i < m_n_telescope_planes; i++) {
+          m_plane_indices.emplace_back(i); }}
       if (sev->GetDescription().find("REF") != string::npos){
         m_plane_indices.emplace_back(m_n_telescope_planes); }
       if (sev->GetDescription().find("DUT") != string::npos){
